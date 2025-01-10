@@ -1,1 +1,2 @@
-# SAT_SeniorProject
+# Welcome to my SAT Solver Senior Project
+
