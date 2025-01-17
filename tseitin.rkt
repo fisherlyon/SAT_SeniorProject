@@ -12,10 +12,6 @@
 (struct condF ([l : Formula] [r : Formula]) #:transparent)
 (struct bicondF ([l : Formula] [r : Formula]) #:transparent)
 
-; makes an auxilary variable symbol
-(define (make-var [n : Integer]) : Symbol
-  (string->symbol (format "x~a" n)))
-
 ; parses a formula
 (define (parse [s : Sexp]) : Formula
   (match s
@@ -26,6 +22,21 @@
     [(list '-> left right) (condF (parse left) (parse right))]
     [(list '<-> left right) (bicondF (parse left) (parse right))]
     [_ (error 'parse "invalid syntax, given ~e" s)]))
+
+; checks if a formula is in CNF
+(define (check-cnf [form : Formula]) : Boolean
+  (match form
+    [(varF _) #t]
+    [(notF (varF _)) #t]
+    [(auxF _) #t]
+    [(orF forms) (literal-list? forms)]
+    [(andF forms) (disjunct-literal-list? forms)]
+    [(condF _ _) #f]
+    [(bicondF _ _) #f]))
+
+; makes an auxilary variable symbol
+(define (make-var [n : Integer]) : Symbol
+  (string->symbol (format "x~a" n)))
 
 ; checks if a formula is a literal
 (define (is-literal? [form : Formula]) : Boolean
@@ -52,17 +63,6 @@
   (match forms
     ['() #t]
     [(cons f r) (if (not (or (is-literal? f) (is-disjunct? f))) #f (disjunct-literal-list? r))]))
-
-; checks if a formula is in CNF
-(define (check-cnf [form : Formula]) : Boolean
-  (match form
-    [(varF _) #t]
-    [(notF (varF _)) #t]
-    [(auxF _) #t]
-    [(orF forms) (literal-list? forms)]
-    [(andF forms) (disjunct-literal-list? forms)]
-    [(condF _ _) #f]
-    [(bicondF _ _) #f]))
 
 ; checks if something is an invalid symbol
 (define (invalid-var? [sym : Any]) : Boolean
