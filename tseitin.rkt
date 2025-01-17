@@ -23,16 +23,22 @@
     [(list '<-> left right) (bicondF (parse left) (parse right))]
     [_ (error 'parse "invalid syntax, given ~e" s)]))
 
+; prepare for tseitin transform
+(define (to-auxiliary [form : Formula] [count : Integer]) : Formula
+  (match count
+    [1 (to-auxiliary
+        (bicondF (auxF (make-var count)) form) (+ 1 count))]
+    [_ form])) ;; TO-DO
+
+; (to-auxiliary (parse '(-> (v A (! B)) (<-> A (! B)))) 1)
+
 ; checks if a formula is in CNF
-(define (check-cnf [form : Formula]) : Boolean
+(define (is-cnf? [form : Formula]) : Boolean
   (match form
-    [(varF _) #t]
-    [(notF (varF _)) #t]
-    [(auxF _) #t]
+    [(? is-literal?) #t]
     [(orF forms) (literal-list? forms)]
-    [(andF forms) (disjunct-literal-list? forms)]
-    [(condF _ _) #f]
-    [(bicondF _ _) #f]))
+    [(andF forms) (andmap is-cnf? forms)]
+    [_ #f]))
 
 ; makes an auxilary variable symbol
 (define (make-var [n : Integer]) : Symbol
@@ -52,18 +58,6 @@
     ['() #t]
     [(cons f r) (if (not (is-literal? f)) #f (literal-list? r))]))
 
-; checks if a formula is a disjunct
-(define (is-disjunct? [form : Formula]) : Boolean
-  (match form
-    [(orF _) #t]
-    [_ #f]))
-
-; checks if a list of formulas is a list of disjuncts
-(define (disjunct-literal-list? [forms : (Listof Formula)]) : Boolean
-  (match forms
-    ['() #t]
-    [(cons f r) (if (not (or (is-literal? f) (is-disjunct? f))) #f (disjunct-literal-list? r))]))
-
 ; checks if something is an invalid symbol
 (define (invalid-var? [sym : Any]) : Boolean
   (match sym
@@ -71,27 +65,38 @@
     [_ #f]))
 
 ; test cases
-; check-cnf tests
-(check-equal? (check-cnf (varF 'A)) #t)
-(check-equal? (check-cnf (orF (list (varF 'A) (varF 'B)))) #t)
-(check-equal? (check-cnf (andF (list (orF (list (varF 'A) (varF 'B))) (varF 'C)))) #t)
-
-; disjuncts-list? tests
-(check-equal? (disjunct-literal-list? (list (varF 'A) (notF (varF 'B)) (varF 'C))) #t)
+; is-cnf? tests
+(check-equal? (is-cnf? (varF 'A)) #t)
+(check-equal? (is-cnf? (orF (list (varF 'A) (varF 'B)))) #t)
+(check-equal? (is-cnf? (andF (list (orF (list (varF 'A) (varF 'B))) (varF 'C)))) #t)
 (check-equal?
- (disjunct-literal-list?
-  (list (orF (list (varF 'A) (varF 'B) (varF 'C))) (andF (list (varF 'D) (varF 'E))))) #f)
+ (is-cnf?
+  (andF
+   (list
+    (orF
+     (list
+      (notF (andF (list (varF 'A) (varF 'B))))(varF 'C)))
+    (varF 'D)))) #f)
 (check-equal?
- (disjunct-literal-list?
-  (list (orF (list (varF 'A) (varF 'B) (varF 'C))) (orF (list (varF 'D) (varF 'E))))) #t)
+ (is-cnf?
+  (andF
+   (list
+    (orF (list (varF 'A) (notF (varF 'B)) (notF (varF 'C))))
+    (orF (list (notF (varF 'D)) (varF 'E) (varF 'F) (varF 'D) (varF 'F)))))) #t)
+(check-equal?
+ (is-cnf? (notF (andF (list (varF 'A) (varF 'B))))) #f)
+(check-equal?
+ (is-cnf? (andF (list (notF (orF (list (varF 'A) (varF 'B)))) (varF 'C)))) #f)
+(check-equal?
+ (is-cnf?
+  (andF
+   (list
+    (varF 'A)
+    (orF (list (varF 'B) (andF (list (varF 'D) (varF 'E)))))))) #f)
 
 ; literals-list? tests
 (check-equal? (literal-list? (list (varF 'A) (notF (varF 'B)) (varF 'C))) #t)
 (check-equal? (literal-list? (list (orF (list (varF 'A) (varF 'B) (varF 'C))))) #f)
-
-; is-disjunct? tests
-(check-equal? (is-disjunct? (orF (list (varF 'A) (varF 'B) (varF 'C)))) #t)
-(check-equal? (is-disjunct? (andF (list (varF 'A) (varF 'B) (varF 'C)))) #f)
 
 ; is-literal? tests
 (check-equal? (is-literal? (varF 'A)) #t)
