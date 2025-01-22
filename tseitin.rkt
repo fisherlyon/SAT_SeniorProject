@@ -35,36 +35,77 @@
     [(bicondF l r) (list '<-> (to-sexp l) (to-sexp r))]
     [_ (error 'to-sexp "invalid AST, given ~e" form)]))
 
-; converts a formula to complete auxiliary form
-(define (to-auxiliary [form : Formula] [count : Integer]) : Formula
-  (andF (aux-helper form 1)))
+; converts a formula to auxiliary form
+(define (to-aux-form [form : Formula]) : Formula
+  (if (or (is-literal? form) (just-literals? form))
+      form
+      (let* ([subforms (get-subforms form)] ; list of derived subformulas
+             [aux-vars ; list of auxiliary variables
+              (map (lambda ([i : Integer]) (auxF (make-var i)))
+                   (build-list (length subforms) add1))])
+        (andF (zip-lists (subst-subs subforms aux-vars) aux-vars)))))
 
-; converts formula to incomplete auxiliary form
-(define (aux-helper [form : Formula] [count : Integer]) : (Listof Formula)
+; substitute subformulas for corresponding auxiliary variable
+(define (subst-subs [subforms : (Listof Formula)] [aux-vars : (Listof Formula)]) : (Listof Formula)
+  (define (helper [i : Integer] [j : Integer] [subd-list : (Listof Formula)]) : (Listof Formula)
+    (if (>= i (length subforms))
+        subd-list
+        (let* ([cur-form (list-ref subd-list j)] ; form to take replacement aux
+               [cur-sub (list-ref subd-list i)] ; subform to replace in form
+               [cur-aux (list-ref aux-vars i)] ; aux as replacement
+               [subd (substitute cur-form cur-sub cur-aux)]) ; attempted sub
+          (if (equal? cur-form subd)
+              (helper i (- j 1) subd-list) ; if equal, no sub, decrement j
+              (helper (+ i 1) i (list-set subd-list j subd))))))
+  (helper 1 0 subforms))
+
+; substitutes a replacement for a subformula in a formula
+(define (substitute [form : Formula] [sub : Formula] [repl : Formula]) : Formula
   (match form
-    [(? is-literal?) '()]
-    [(notF sub)
-     (append (list (bicondF (auxF (make-var count)) form))
-             (aux-helper sub (+ 1 count)))]
-    [(or (andF subs) (orF subs))
-     (append (list (bicondF (auxF (make-var count)) form))
-             (list-helper (cast subs (Listof Formula)) (+ 1 count)))]
+    [(? (lambda (f) (equal? f sub))) repl] ; form = sub, so replace
+    [(notF subform) (if (is-literal? subform) form (notF (substitute subform sub repl)))]
+    [(or (andF subforms) (orF subforms))
+     (define new-subs
+       (map (lambda ([f : Formula]) (substitute f sub repl)) (cast subforms (Listof Formula))))
+     (if (andF? form) (andF new-subs) (orF new-subs))]
     [(or (condF l r) (bicondF l r))
-     (append (list (bicondF (auxF (make-var count)) form))
-             (aux-helper (cast l Formula) (+ 1 count))
-             (aux-helper (cast r Formula) (+ 2 count)))]))
+     (define new-l (substitute (cast l Formula) sub repl))
+     (define new-r (substitute (cast r Formula) sub repl))
+     (if (condF? form) (condF new-l new-r) (bicondF new-l new-r))]
+    [_ form])) ; if no match, return the original form
+ 
+; zip the list of subformulas and the list of auxiliary variables together
+(define (zip-lists [subforms : (Listof Formula)] [aux-vars : (Listof Formula)]) : (Listof Formula)
+  (map
+   (lambda ([sub : Formula] [aux : Formula])
+     (bicondF aux sub))
+   subforms aux-vars))
 
-; converts a list of formula to their incomplete auxiliary form
-(define (list-helper [forms : (Listof Formula)] [count : Integer]) : (Listof Formula)
+; given a formula, extracts all subformulas (excluding simple variables)
+(define (get-subforms [form : Formula]) : (Listof Formula)
+  (match form
+    [(? varF?) '()]
+    [(notF sub) (cons form (get-subforms sub))]
+    [(or (andF subs) (orF subs))
+     (cons form (subform-list-helper (cast subs (Listof Formula))))]
+    [(or (condF l r) (bicondF l r))
+     (append (list form)
+             (get-subforms (cast l Formula))
+             (get-subforms (cast r Formula)))]))
+
+; given a list of formulas, get all their subformulas
+(define (subform-list-helper [forms : (Listof Formula)]) : (Listof Formula)
   (match forms
     ['() '()]
     [(cons f r)
-     (if (is-literal? f)
-         (list-helper r (+ count 1))
-         (cons (bicondF (auxF (make-var count)) f) (list-helper r (+ count 1))))]))
+     (append (get-subforms f)
+             (subform-list-helper r))]))
 
-; (to-auxiliary (parse '(-> (v A (! B)) (<-> A (! B)))) '() 1 0)
-; (to-sexp (andF (go (parse '(-> (v A (! B)) (-> A (! B)))) 1)))
+; given the list of all subformulas, assign auxiliary variables to each
+(define (give-aux [subforms : (Listof Formula)] [count : Integer]) : (Listof Formula)
+  (match subforms
+    ['() '()]
+    [(cons f r) (cons (bicondF (auxF (make-var count)) f) (give-aux r (+ 1 count)))]))
 
 ; checks if a formula is in CNF
 (define (is-cnf? [form : Formula]) : Boolean
@@ -107,20 +148,38 @@
     [_ #f]))
 
 ; test cases
-; aux-helper tests
+; get-subforms tests
 (check-equal?
- (to-sexp (to-auxiliary (parse '(-> (v A (! B)) (<-> A (! B)))) 1))
- '(& (<-> x1 (-> (v A (! B)) (<-> A (! B))))
-     (<-> x2 (v A (! B)))
-     (<-> x3 (<-> A (! B)))))
+ (to-sexp (to-aux-form (parse '(-> (v A (! B)) (<-> A (! B))))))
+ '(& (<-> x1 (-> x2 x4))
+     (<-> x2 (v A x3))
+     (<-> x3 (! B))
+     (<-> x4 (<-> A x5))
+     (<-> x5 (! B))))
 
 (check-equal?
- (to-sexp (to-auxiliary (parse '(-> (-> R P) (-> (! (& Q R)) P))) 1))
- '(& (<-> x1 (-> (-> R P) (-> (! (& Q R)) P)))
+ (to-sexp (to-aux-form (parse '(-> (-> R P) (-> (! (& Q R)) P)))))
+ '(& (<-> x1 (-> x2 x3))
      (<-> x2 (-> R P))
-     (<-> x3 (-> (! (& Q R)) P))
-     (<-> x4 (! (& Q R)))
+     (<-> x3 (-> x4 P))
+     (<-> x4 (! x5))
      (<-> x5 (& Q R))))
+
+(check-equal?
+ (to-sexp (to-aux-form (parse '(-> (& (v p q) r) (! s)))))
+ '(& (<-> x1 (-> x2 x4))
+     (<-> x2 (& x3 r))
+     (<-> x3 (v p q))
+     (<-> x4 (! s))))
+
+(check-equal?
+ (to-sexp (to-aux-form (parse '(v (& A (! B) C) (-> D (<-> E (! F))) G))))
+ '(& (<-> x1 (v x2 x4 G))
+     (<-> x2 (& A x3 C))
+     (<-> x3 (! B))
+     (<-> x4 (-> D x5))
+     (<-> x5 (<-> E x6))
+     (<-> x6 (! F))))
 
 ; just-literals? tests
 (check-equal?
