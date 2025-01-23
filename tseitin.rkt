@@ -12,6 +12,10 @@
 (struct condF ([l : Formula] [r : Formula]) #:transparent)
 (struct bicondF ([l : Formula] [r : Formula]) #:transparent)
 
+; top level tseitin transformation
+(define (tseitin-transform [form : Sexp]) : Sexp
+  (to-sexp (clean-cnf (to-cnf (to-auxiliary (parse form))))))
+
 ; parses a formula (Concrete Syntax -> AST)
 (define (parse [s : Sexp]) : Formula
   (match s
@@ -35,15 +39,77 @@
     [(bicondF l r) (list '<-> (to-sexp l) (to-sexp r))]
     [_ (error 'to-sexp "invalid AST, given ~e" form)]))
 
+; converts a formula to conjunctive normal form
+(define (to-cnf [form : Formula]) : Formula
+  (match form
+    [(or (? is-literal?) (? is-aux-literal?)) form]
+    [(notF sub) (to-cnf (distr-neg sub))]
+    [(andF subs) (andF (map to-cnf subs))]
+    [(orF subs) (foldr distr-or (first (map to-cnf subs)) (rest (map to-cnf subs)))]
+    [(condF l r) (to-cnf (elim-cond l r))]
+    [(bicondF l r) (to-cnf (elim-bicond l r))]))
+
+; deeply flattens nested disjunctions
+(define (clean-cnf [form : Formula]) : Formula
+  (define (flatten-ands [f : Formula]) : (Listof Formula)
+    (match f
+      [(andF forms) (append-map flatten-ands forms)]
+      [_ (list f)]))
+  
+  (define (flatten-ors [f : Formula]) : (Listof Formula)
+    (match f
+      [(orF forms) (append-map 
+                    (lambda ([sub : Formula]) 
+                      (match sub 
+                        [(orF nested-forms) nested-forms]
+                        [_ (list sub)]))
+                    forms)]
+      [_ (list f)]))
+  
+  (andF 
+   (map 
+    (lambda ([conj : Formula]) 
+      (let ([flattened (remove-duplicates (flatten-ors conj) equal?)])
+        (if (= (length flattened) 1)
+            (first flattened) ; use the single element directly
+            (orF flattened)))) ; otherwise, wrap in orF
+    (flatten-ands form))))
+
+; eliminates conditional from a formula : (x -> y) <=> (!x v y)
+(define (elim-cond [left : Formula] [right : Formula]) : Formula
+  (orF (list (notF left) right)))
+
+; eliminates biconditional from a formula : (x <-> y) <=> (x -> y) & (y -> x)
+(define (elim-bicond [left : Formula] [right : Formula]) : Formula
+  (andF (list (condF left right) (condF right left))))
+
+; distribute negation over formula
+(define (distr-neg [form : Formula]) : Formula
+  (match form
+    [(or (? varF?) (? auxF?)) (notF form)]
+    [(notF inner) inner] ; elim double negation
+    [(andF subs) (orF (map notF subs))] ; distr negative across conjunction
+    [(orF subs) (andF (map notF subs))] ; distr negative across disjunction
+    [(condF l r) (andF (list l (notF r)))]
+    [(bicondF l r) (orF (list (notF (condF l r)) (notF (condF r l))))]
+    [_ (error 'distr-neg "invalid negation, given ~e" form)]))
+
+; distributes disjunction over conjunction
+(define (distr-or [a : Formula] [b : Formula]) : Formula
+  (cond
+    [(andF? a) (andF (map (lambda ([f : Formula]) (distr-or f b)) (andF-forms a)))]
+    [(andF? b) (andF (map (lambda ([f : Formula]) (distr-or a f)) (andF-forms b)))]
+    [else (orF (list a b))]))
+
 ; converts a formula to auxiliary form
-(define (to-aux-form [form : Formula]) : Formula
+(define (to-auxiliary [form : Formula]) : Formula
   (if (or (is-literal? form) (just-literals? form))
       form
       (let* ([subforms (get-subforms form)] ; list of derived subformulas
              [aux-vars ; list of auxiliary variables
               (map (lambda ([i : Integer]) (auxF (make-var i)))
                    (build-list (length subforms) add1))])
-        (andF (zip-lists (subst-subs subforms aux-vars) aux-vars)))))
+        (andF (cons (auxF 'x1) (zip-lists (subst-subs subforms aux-vars) aux-vars))))))
 
 ; substitute subformulas for corresponding auxiliary variable
 (define (subst-subs [subforms : (Listof Formula)] [aux-vars : (Listof Formula)]) : (Listof Formula)
@@ -126,6 +192,12 @@
     [(notF (varF _)) #t]
     [_ #f]))
 
+(define (is-aux-literal? [form : Formula]) : Boolean
+  (match form
+    [(auxF _) #t]
+    [(notF (auxF _)) #t]
+    [_ #f]))
+
 ; checks if a list of formulas is a list of literals
 (define (literal-list? [forms : (Listof Formula)]) : Boolean
   (match forms
@@ -148,33 +220,57 @@
     [_ #f]))
 
 ; test cases
+; tseitin transform tests
+(check-equal?
+ (tseitin-transform '(-> (-> R P) (-> (! (& Q R)) P)))
+ '(&
+   x1
+   (v x3 (! x2) (! x1))
+   (v x1 x2)
+   (v x1 (! x3))
+   (v P (! R) (! x2))
+   (v x2 R)
+   (v x2 (! P))
+   (v P (! x4) (! x3))
+   (v x3 x4)
+   (v x3 (! P))
+   (v (! x5) (! x4))
+   (v x4 x5)
+   (v Q (! x5))
+   (v R (! x5))
+   (v x5 (! R) (! Q))))
+
 ; get-subforms tests
 (check-equal?
- (to-sexp (to-aux-form (parse '(-> (v A (! B)) (<-> A (! B))))))
- '(& (<-> x1 (-> x2 x4))
+ (to-sexp (to-auxiliary (parse '(-> (v A (! B)) (<-> A (! B))))))
+ '(& x1
+     (<-> x1 (-> x2 x4))
      (<-> x2 (v A x3))
      (<-> x3 (! B))
      (<-> x4 (<-> A x5))
      (<-> x5 (! B))))
 
 (check-equal?
- (to-sexp (to-aux-form (parse '(-> (-> R P) (-> (! (& Q R)) P)))))
- '(& (<-> x1 (-> x2 x3))
+ (to-sexp (to-auxiliary (parse '(-> (-> R P) (-> (! (& Q R)) P)))))
+ '(& x1
+     (<-> x1 (-> x2 x3))
      (<-> x2 (-> R P))
      (<-> x3 (-> x4 P))
      (<-> x4 (! x5))
      (<-> x5 (& Q R))))
 
 (check-equal?
- (to-sexp (to-aux-form (parse '(-> (& (v p q) r) (! s)))))
- '(& (<-> x1 (-> x2 x4))
+ (to-sexp (to-auxiliary (parse '(-> (& (v p q) r) (! s)))))
+ '(& x1
+     (<-> x1 (-> x2 x4))
      (<-> x2 (& x3 r))
      (<-> x3 (v p q))
      (<-> x4 (! s))))
 
 (check-equal?
- (to-sexp (to-aux-form (parse '(v (& A (! B) C) (-> D (<-> E (! F))) G))))
- '(& (<-> x1 (v x2 x4 G))
+ (to-sexp (to-auxiliary (parse '(v (& A (! B) C) (-> D (<-> E (! F))) G))))
+ '(& x1
+     (<-> x1 (v x2 x4 G))
      (<-> x2 (& A x3 C))
      (<-> x3 (! B))
      (<-> x4 (-> D x5))
