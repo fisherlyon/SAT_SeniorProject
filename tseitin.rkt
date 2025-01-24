@@ -1,6 +1,10 @@
 #lang typed/racket
 
 (require typed/rackunit)
+(provide tseitin)
+(provide Formula
+         varF auxF notF andF orF condF bicondF
+         varF? auxF? notF? andF? orF? condF? bicondF?)
 
 ; formula type definition
 (define-type Formula (U varF auxF notF andF orF condF bicondF))
@@ -12,9 +16,13 @@
 (struct condF ([l : Formula] [r : Formula]) #:transparent)
 (struct bicondF ([l : Formula] [r : Formula]) #:transparent)
 
-; top level tseitin transformation
+; tseitin transformation (sexp -> sexp)
 (define (tseitin-transform [form : Sexp]) : Sexp
   (to-sexp (clean-cnf (to-cnf (to-auxiliary (parse form))))))
+
+; tseitin transformation (sexp -> formula)
+(define (tseitin [form : Sexp]) : Formula
+  (clean-cnf (to-cnf (to-auxiliary (parse form)))))
 
 ; parses a formula (Concrete Syntax -> AST)
 (define (parse [s : Sexp]) : Formula
