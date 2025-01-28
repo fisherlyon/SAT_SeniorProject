@@ -17,7 +17,7 @@
 (struct bicondF ([l : Formula] [r : Formula]) #:transparent)
 
 ; tseitin transformation (sexp -> sexp)
-(define (tseitin-transform [form : Sexp]) : Sexp
+(define (tseitin-sexp [form : Sexp]) : Sexp
   (to-sexp (clean-cnf (to-cnf (to-auxiliary (parse form))))))
 
 ; tseitin transformation (sexp -> formula)
@@ -59,29 +59,22 @@
 
 ; deeply flattens nested disjunctions
 (define (clean-cnf [form : Formula]) : Formula
-  (define (flatten-ands [f : Formula]) : (Listof Formula)
-    (match f
-      [(andF forms) (append-map flatten-ands forms)]
-      [_ (list f)]))
-  
-  (define (flatten-ors [f : Formula]) : (Listof Formula)
-    (match f
-      [(orF forms) (append-map 
-                    (lambda ([sub : Formula]) 
-                      (match sub 
-                        [(orF nested-forms) nested-forms]
-                        [_ (list sub)]))
-                    forms)]
-      [_ (list f)]))
-  
+  (define (flatten [f : Formula] [type : Symbol]) : (Listof Formula)
+    (cond
+      [(and (equal? type 'andF) (andF? f))
+       (append-map (lambda ([sub : Formula]) (flatten sub type)) (andF-forms f))]
+      [(and (equal? type 'orF) (orF? f))
+       (append-map (lambda ([sub : Formula]) (flatten sub type)) (orF-forms f))]
+      [else (list f)]))
+
   (andF 
    (map 
     (lambda ([conj : Formula]) 
-      (let ([flattened (remove-duplicates (flatten-ors conj) equal?)])
+      (let ([flattened (remove-duplicates (flatten conj 'orF) equal?)])
         (if (= (length flattened) 1)
             (first flattened) ; use the single element directly
             (orF flattened)))) ; otherwise, wrap in orF
-    (flatten-ands form))))
+    (flatten form 'andF))))
 
 ; eliminates conditional from a formula : (x -> y) <=> (!x v y)
 (define (elim-cond [left : Formula] [right : Formula]) : Formula
@@ -230,7 +223,7 @@
 ; test cases
 ; tseitin transform tests
 (check-equal?
- (tseitin-transform '(-> (-> R P) (-> (! (& Q R)) P)))
+ (tseitin-sexp '(-> (-> R P) (-> (! (& Q R)) P)))
  '(&
    x1
    (v x3 (! x2) (! x1))
