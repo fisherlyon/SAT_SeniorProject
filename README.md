@@ -54,4 +54,8 @@ Where...
     <-> = Biconditional
 ```
 
+## Tseitin Transformation (tseitin.rkt)
+
+## Brute Force SAT Solver (bf_force_sat.rkt)
+
 
