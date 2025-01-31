@@ -19,7 +19,7 @@ To learn more about the goal of this project, please view the Proposal and Sprin
 ```
 (define-type Formula (U varF auxF notF andF orF condF bicondF))
 (struct varF ([var : Symbol]) #:transparent)
-(struct auxF ([var : Symbol]) #:transparent)
+(struct auxF ([aux : Symbol]) #:transparent)
 (struct notF ([form : Formula]) #:transparent)
 (struct andF ([forms : (Listof Formula)]) #:transparent)
 (struct orF ([forms : (Listof Formula)]) #:transparent)
