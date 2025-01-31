@@ -28,7 +28,7 @@
 (define (parse [s : Sexp]) : Formula
   (match s
     [(and (not (? invalid-var? var)) (? symbol? var)) (varF var)]
-    [(list '~ form) (notF (parse form))]
+    [(list '! form) (notF (parse form))]
     [(list '& forms ...) (andF (map parse forms))]
     [(list 'v forms ...) (orF (map parse forms))]
     [(list '-> left right) (condF (parse left) (parse right))]
@@ -40,7 +40,7 @@
   (match form
     [(varF var) var]
     [(auxF aux) aux]
-    [(notF sub) (list '~ (to-sexp sub))]
+    [(notF sub) (list '! (to-sexp sub))]
     [(andF forms) (cons '& (map to-sexp forms))]
     [(orF forms) (cons 'v (map to-sexp forms))]
     [(condF l r) (list '-> (to-sexp l) (to-sexp r))]
@@ -76,7 +76,7 @@
             (orF flattened)))) ; otherwise, wrap in orF
     (flatten form 'andF))))
 
-; eliminates conditional from a formula : (x -> y) <=> (~x v y)
+; eliminates conditional from a formula : (x -> y) <=> (!x v y)
 (define (elim-cond [left : Formula] [right : Formula]) : Formula
   (orF (list (notF left) right)))
 
@@ -217,66 +217,66 @@
 ; checks if something is an invalid symbol
 (define (invalid-var? [sym : Any]) : Boolean
   (match sym
-    [(or '~ '& 'v '-> '<->) #t]
+    [(or '! '& 'v '-> '<->) #t]
     [_ #f]))
 
 ; test cases
 ; tseitin transform tests
 (check-equal?
- (tseitin-sexp '(-> (-> R P) (-> (~ (& Q R)) P)))
+ (tseitin-sexp '(-> (-> R P) (-> (! (& Q R)) P)))
  '(&
    x1
-   (v x3 (~ x2) (~ x1))
+   (v x3 (! x2) (! x1))
    (v x1 x2)
-   (v x1 (~ x3))
-   (v P (~ R) (~ x2))
+   (v x1 (! x3))
+   (v P (! R) (! x2))
    (v x2 R)
-   (v x2 (~ P))
-   (v P (~ x4) (~ x3))
+   (v x2 (! P))
+   (v P (! x4) (! x3))
    (v x3 x4)
-   (v x3 (~ P))
-   (v (~ x5) (~ x4))
+   (v x3 (! P))
+   (v (! x5) (! x4))
    (v x4 x5)
-   (v Q (~ x5))
-   (v R (~ x5))
-   (v x5 (~ R) (~ Q))))
+   (v Q (! x5))
+   (v R (! x5))
+   (v x5 (! R) (! Q))))
 
 ; get-subforms tests
 (check-equal?
- (to-sexp (to-auxiliary (parse '(-> (v A (~ B)) (<-> A (~ B))))))
+ (to-sexp (to-auxiliary (parse '(-> (v A (! B)) (<-> A (! B))))))
  '(& x1
      (<-> x1 (-> x2 x4))
      (<-> x2 (v A x3))
-     (<-> x3 (~ B))
+     (<-> x3 (! B))
      (<-> x4 (<-> A x5))
-     (<-> x5 (~ B))))
+     (<-> x5 (! B))))
 
 (check-equal?
- (to-sexp (to-auxiliary (parse '(-> (-> R P) (-> (~ (& Q R)) P)))))
+ (to-sexp (to-auxiliary (parse '(-> (-> R P) (-> (! (& Q R)) P)))))
  '(& x1
      (<-> x1 (-> x2 x3))
      (<-> x2 (-> R P))
      (<-> x3 (-> x4 P))
-     (<-> x4 (~ x5))
+     (<-> x4 (! x5))
      (<-> x5 (& Q R))))
 
 (check-equal?
- (to-sexp (to-auxiliary (parse '(-> (& (v p q) r) (~ s)))))
+ (to-sexp (to-auxiliary (parse '(-> (& (v p q) r) (! s)))))
  '(& x1
      (<-> x1 (-> x2 x4))
      (<-> x2 (& x3 r))
      (<-> x3 (v p q))
-     (<-> x4 (~ s))))
+     (<-> x4 (! s))))
 
 (check-equal?
- (to-sexp (to-auxiliary (parse '(v (& A (~ B) C) (-> D (<-> E (~ F))) G))))
+ (to-sexp (to-auxiliary (parse '(v (& A (! B) C) (-> D (<-> E (! F))) G))))
  '(& x1
      (<-> x1 (v x2 x4 G))
      (<-> x2 (& A x3 C))
-     (<-> x3 (~ B))
+     (<-> x3 (! B))
      (<-> x4 (-> D x5))
      (<-> x5 (<-> E x6))
-     (<-> x6 (~ F))))
+     (<-> x6 (! F))))
 
 ; just-literals? tests
 (check-equal?
@@ -331,16 +331,16 @@
 (check-equal? (make-var 10) 'x10)
 
 ; invalid-var? tests
-(check-equal? (invalid-var? '~) #t)
+(check-equal? (invalid-var? '!) #t)
 (check-equal? (invalid-var? '<-) #f)
 
 ; parse tests
 (check-equal? (parse 'A) (varF 'A))
-(check-equal? (parse '(~ A)) (notF (varF 'A)))
+(check-equal? (parse '(! A)) (notF (varF 'A)))
 (check-equal? (parse '(& A B C)) (andF (list (varF 'A) (varF 'B) (varF 'C))))
 (check-equal? (parse '(v A B C)) (orF (list (varF 'A) (varF 'B) (varF 'C))))
 (check-equal? (parse '(-> A B)) (condF (varF 'A) (varF 'B)))
 (check-equal? (parse '(<-> A B)) (bicondF (varF 'A) (varF 'B)))
 (check-equal?
- (parse '(-> (v A (~ B)) (<-> A (~ B))))
+ (parse '(-> (v A (! B)) (<-> A (! B))))
  (condF (orF (list (varF 'A) (notF (varF 'B)))) (bicondF (varF 'A) (notF (varF'B)))))
