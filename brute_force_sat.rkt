@@ -11,7 +11,7 @@
          [num-form (subst-nums-for-vars rf-form vars num-subs)] ; the number form cnf of the reformatted cnf
          [result (interp num-form -1 (length vars) #f)]) ; the result of the brute force sat test
     (if (equal? result -1)
-        '((NoTVA . #f))
+        '((NoSAT . #f))
         (get-result vars (bin-to-bool (padded-binary result (length vars)))))))
 
 ; gathers the result
@@ -102,6 +102,7 @@
     [(andF forms)
      (foldl (lambda ([f : Formula] [acc : (Listof (Listof Formula))])
               (match f
+                [(varF var) (cons (list f) acc)]
                 [(auxF var) (cons (list f) acc)]
                 [(orF frs) (cons frs acc)]
                 [_ (error 'reformat "invalid cnf, given ~e" f)]))
