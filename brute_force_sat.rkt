@@ -121,16 +121,16 @@
 ; tests
 ; extract-vars tests
 (check-equal?
- (extract-vars (reformat (tseitin '(-> (& (v p q) r) (! s)))) '())
+ (extract-vars (reformat (tseitin '(-> (& (v p q) r) (~ s)))) '())
  '(p q r s x1 x2 x3 x4))
 
 (check-equal?
- (extract-vars (reformat (tseitin '(v (& A (! B) C) (-> D (<-> E (! F))) G))) '())
+ (extract-vars (reformat (tseitin '(v (& A (~ B) C) (-> D (<-> E (~ F))) G))) '())
  '(A B C D E F G x1 x2 x3 x4 x5 x6))
 
 ; reformat tests
 (check-equal?
- (reformat (tseitin '(-> (& (v p q) r) (! s))))
+ (reformat (tseitin '(-> (& (v p q) r) (~ s))))
  (list
   (list (auxF 'x4) (varF 's))
   (list (notF (varF 's)) (notF (auxF 'x4)))
