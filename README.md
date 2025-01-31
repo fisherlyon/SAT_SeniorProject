@@ -43,7 +43,7 @@ Where...
 ```
 By the stated data definitions, the above formula in Racket would look like the following:
 ```
-(v (& A (! B) C) (-> D (<-> E (! F))) G)
+(v (& A (~ B) C) (-> D (<-> E (~ F))) G)
 ```
 Where...
 ```
