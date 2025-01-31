@@ -7,10 +7,10 @@ To learn more about the goal of this project, please view the Proposal and Sprin
 ### Formula EBNF:
 
 ```
-<Formula> ::= <var> | <aux>
-            | (! Formula)
-            | (& (Listof Formula))
-            | (v (Listof Formula))
-            | (-> Formula Formula)
-            | (<-> Formula Formula)
+<Formula> ::= <var> | <aux>             // Boolean variable or auxiliary variable
+            | (! Formula)               // Negation of a boolean formula
+            | (& (Listof Formula))      // Conjunction of boolean formulas
+            | (v (Listof Formula))      // Disjunction of boolean formulas
+            | (-> Formula Formula)      // Conditional of two boolean formulas
+            | (<-> Formula Formula)     // Biconditional of two boolean formulas
 ```
