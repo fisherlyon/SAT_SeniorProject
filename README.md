@@ -74,3 +74,7 @@ ex. (A v B) ∧ (C v ¬D) <==> (& (v A B) (v C (~ D))) <==> (& (v 1 2) (v 3 -4))
             p cnf 4 2
             3 -4 0
             1 2 0
+```
+
+## Testing SAT by Reading a CNF File (read_cnf.rkt)
+...
