@@ -1,5 +1,11 @@
 #lang typed/racket
 
+#|
+The core purpose of this program is to take an arbitrary boolean formula, convert it to CNF,
+and put that transformation into a file with the DIMACS .cnf format.
+This file format is used commonly in modern SAT solvers.
+|#
+
 (require typed/rackunit)
 (require "tseitin.rkt") ; adding usage of Formulas and tseitin
 (require "brute_force_sat.rkt")
@@ -18,7 +24,7 @@
   (let* ([rf-form (reformat (tseitin form))] ; reformatted cnf form -- (()())
          [vars (extract-vars rf-form '())] ; the extracted sorted variables from the above cnf
          [num-subs (build-list (length vars) add1)] ; the number substitutes for the above variables
-         [num-form (subst-nums-for-vars rf-form vars num-subs)])
+         [num-form (subst-nums-for-vars rf-form vars num-subs)]) ; the number form cnf of the reformatted cnf
     (with-output-to-file filename
       (lambda ()
         (printf "c FILE: ~a\nc\n" filename)
