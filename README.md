@@ -1,5 +1,4 @@
 # Welcome to my SAT Solver Senior Project
-
 To learn more about the goal of this project, please view the Proposal and Sprint documents.<br>
 
 ## Running
@@ -32,7 +31,6 @@ To learn more about the goal of this project, please view the Proposal and Sprin
 ```
 
 ### Example Formula Construction
-
 A boolean formula as seen in the wild might look something like the following.
 ```
 (A ∧ ¬B ∧ ¬C) v (D -> (E <-> ¬F)) v G 
@@ -62,4 +60,16 @@ Where...
 
 ## Brute Force SAT Solver (bf_force_sat.rkt)
 
+## CNF File Creation (write_cnf.rkt)
+The core purpose of this program is to take an arbitrary boolean formula, convert it to CNF, and put that transformation into a file with the DIMACS .cnf format. This file format is used commonly in modern SAT solvers.<br>
+For DIMACS .cnf form:
+- Lines that begin with 'c' are comment lines.
+- The line that begins with 'p' is the header line and is formatted like the following:
+- The remaining lines are the clauses of the formula, where each line is a disjunct terminated by a zero. Positive boolean variables are represented by positive integers and the negation of a boolean variables is represnted by a negative integer.
+```
+ex. (& (v A B) (v C (~ D))) <==> (& (v 1 2) (v 3 -4))
 
+            c FILE: <filename>
+            p cnf 4 2
+            1 2 0
+            3 -4 0
