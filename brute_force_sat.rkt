@@ -2,16 +2,18 @@
 
 (require typed/rackunit)
 (require "tseitin.rkt") ; adding usage of Formulas and tseitin
+(provide reformat extract-vars build-list subst-nums-for-vars)
 
-; brute force SAT solver for a given sexp formula -- work in progress
-(define (bf-sat [form : Sexp]) : (Listof (Pairof Symbol Boolean))
+; brute force SAT solver for a given sexp formula
+; complete in that it converts a form to CNF and tests satisfiability
+(define (complete-bf-sat [form : Sexp]) : (Listof (Pairof Symbol Boolean))
   (let* ([rf-form (reformat (tseitin form))] ; reformatted cnf form -- (()())
          [vars (extract-vars rf-form '())] ; the extracted sorted variables from the above cnf
          [num-subs (build-list (length vars) add1)] ; the number substitutes for the above variables
          [num-form (subst-nums-for-vars rf-form vars num-subs)] ; the number form cnf of the reformatted cnf
          [result (interp num-form -1 (length vars) #f)]) ; the result of the brute force sat test
     (if (equal? result -1)
-        '((NoSAT . #f))
+        '((UNSAT . #f))
         (get-result vars (bin-to-bool (padded-binary result (length vars)))))))
 
 ; gathers the result
@@ -103,6 +105,7 @@
      (foldl (lambda ([f : Formula] [acc : (Listof (Listof Formula))])
               (match f
                 [(varF var) (cons (list f) acc)]
+                [(notF (varF var)) (cons (list f) acc)]
                 [(auxF var) (cons (list f) acc)]
                 [(orF frs) (cons frs acc)]
                 [_ (error 'reformat "invalid cnf, given ~e" f)]))

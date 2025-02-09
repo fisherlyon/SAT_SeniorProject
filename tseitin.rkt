@@ -18,11 +18,17 @@
 
 ; tseitin transformation (sexp -> sexp)
 (define (tseitin-sexp [form : Sexp]) : Sexp
-  (to-sexp (clean-cnf (to-cnf (to-auxiliary (parse form))))))
+  (define p-form (parse form))
+  (if (is-cnf? p-form)
+      form
+      (to-sexp (clean-cnf (to-cnf (to-auxiliary p-form))))))
 
 ; tseitin transformation (sexp -> formula)
 (define (tseitin [form : Sexp]) : Formula
-  (clean-cnf (to-cnf (to-auxiliary (parse form)))))
+  (define p-form (parse form))
+  (if (is-cnf? p-form)
+      p-form
+      (clean-cnf (to-cnf (to-auxiliary p-form)))))
 
 ; parses a formula (Concrete Syntax -> AST)
 (define (parse [s : Sexp]) : Formula

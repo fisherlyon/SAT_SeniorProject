@@ -2,6 +2,10 @@
 
 To learn more about the goal of this project, please view the Proposal and Sprint documents.<br>
 
+## Running
+
+...
+
 ## Data Definitions
 
 ### Formula EBNF:
