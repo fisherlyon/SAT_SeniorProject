@@ -2,15 +2,15 @@
 
 (require typed/rackunit)
 (require "tseitin.rkt") ; adding usage of Formulas and tseitin
-(provide reformat extract-vars build-list subst-nums-for-vars)
+(provide reformat extract-vars build-list subst-nums-for-vars interp get-sat-result bin-to-bool padded-binary)
 
 ; brute force SAT solver for a given sexp formula
 ; complete in that it converts a form to CNF and tests satisfiability
-(define (complete-bf-sat [form : Sexp]) : (Listof (Pairof Symbol Boolean))
+(define (bf-sat [form : Sexp]) : (Listof (Pairof Symbol Boolean))
   (let* ([rf-form (reformat (tseitin form))] ; reformatted cnf form -- (()())
          [vars (extract-vars rf-form '())] ; the extracted sorted variables from the above cnf
          [num-subs (build-list (length vars) add1)] ; the number substitutes for the above variables
-         [num-form (subst-nums-for-vars rf-form vars num-subs)] ; the number form cnf of the reformatted cnf
+         [num-form (reverse (subst-nums-for-vars rf-form vars num-subs))] ; the number form cnf of the reformatted cnf
          [result (interp num-form -1 (length vars) #f)]) ; the result of the brute force sat test
     (if (equal? result -1)
         '((UNSAT . #f))
@@ -21,6 +21,15 @@
   (match (list vars tva)
     [(list '() '()) '()]
     [(list (cons f1 r1) (cons f2 r2)) (cons (cons f1 f2) (get-result r1 r2))]))
+
+; gathers the result for read_cnf
+(define (get-sat-result [vars : (Listof Integer)] [tva : (Listof Boolean)]) : String
+  (match (list vars tva)
+    [(list '() '()) ""]
+    [(list (cons f1 r1) (cons f2 r2))
+     (if f2
+         (string-append (number->string f1) " " (get-sat-result r1 r2))
+         (string-append (number->string (- f1)) " " (get-sat-result r1 r2)))]))
 
 ; evaluates a single formula given a truth value assignment
 (define (eval [form : (Listof Integer)] [tvas : (Listof Boolean)]) : Boolean

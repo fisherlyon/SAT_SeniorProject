@@ -24,7 +24,7 @@ This file format is used commonly in modern SAT solvers.
   (let* ([rf-form (reformat (tseitin form))] ; reformatted cnf form -- (()())
          [vars (extract-vars rf-form '())] ; the extracted sorted variables from the above cnf
          [num-subs (build-list (length vars) add1)] ; the number substitutes for the above variables
-         [num-form (subst-nums-for-vars rf-form vars num-subs)]) ; the number form cnf of the reformatted cnf
+         [num-form (reverse (subst-nums-for-vars rf-form vars num-subs))]) ; the number form cnf of the reformatted cnf
     (with-output-to-file filename
       (lambda ()
         (printf "c FILE: ~a\nc\n" filename)
