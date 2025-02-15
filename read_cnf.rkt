@@ -9,7 +9,6 @@ the brute force SAT on it.
 (require "tseitin.rkt")
 (require "brute_force_sat.rkt")
 
-
 ; the main -- to be ran from the command line, takes in a filename, tests satisfiability [and writes results to output file]
 (define (main) : Void
   (define args (vector->list (current-command-line-arguments)))
@@ -25,30 +24,48 @@ the brute force SAT on it.
                 (printf "SAT\n")
                 (printf "~a0\n" (get-sat-result (build-list num-vars add1) (bin-to-bool (padded-binary result num-vars))))))))))
 
-; will parse the input cnf file
+; will parse the input cnf file, returning the cnf list and the number of variables
 (define (parse-file [file : String]) : (Values (Listof (Listof Integer)) Integer)
   (define in-port (open-input-file file))
-  (define result-int : Integer 0)
-  (define result-list : (Listof (Listof Integer)) '())
+  (define num-vars : Integer 0)
+  (define cnf-list : (Listof (Listof Integer)) '())
   (for ([line (in-lines in-port)])
-    (cond
-      [(equal? (string-ref line 0) #\p) (set! result-int (first (string->int-list line)))]
-      [(starts-with-int? line) (set! result-list (cons (string->int-list line) result-list))]))
+    (define line-list (string-split line))
+    (match line-list
+      ['() (void)] ; ignore empty lines
+      [(list "p" "cnf" vars clauses) ; problem/header line
+       (if (int? vars)
+           (set! num-vars (str->int vars))
+           (error 'parse-file "Invalid 'p' line in CNF file, given ~a" line))]
+      [(list "c" text ...) (void)] ; ignore comment lines
+      [(list nums ...)
+       (if (int-list? line-list)
+           (set! cnf-list (cons (str-list->int-list line-list) cnf-list))
+           (error 'parse-file "Invalid CNF line, given ~a" (string-join line-list)))]))
   (close-input-port in-port)
-  (values (reverse result-list) result-int))
+  (values (reverse cnf-list) num-vars))
 
-; checks if the first character in a string is an integer
-(define (starts-with-int? [line : String]) : Boolean
-  (cond
-    [(equal? line "") #f]
-    [(char-numeric? (string-ref line 0)) #t]
-    [(and (equal? (string-ref line 0) #\-) (char-numeric? (string-ref line 1))) #t]
-    [else #f]))
+; checks if a string is an integer?
+(define (int? [s : String]) : Boolean
+  (integer? (string->number s)))
 
-; converts a string to a list of integers
-(define (string->int-list [s : String]) : (Listof Integer)
-  (filter (lambda (x) (not (equal? x 0)))
-          (filter exact-integer?
-                  (map string->number (string-split s)))))
+; checks if each string in a list is an integer
+(define (int-list? [strs : (Listof String)]) : Boolean
+  (match strs
+    ['() #t]
+    [(cons f r) (if (int? f) (int-list? r) #f)]))
+
+; converts a string to an integer
+(define (str->int [s : String]) : Integer
+  (cast (string->number s) Integer))
+
+; turns a list of strings to a list of integers
+(define (str-list->int-list [l : (Listof String)]) : (Listof Integer)
+  (match l
+    ['() '()]
+    [(cons f r)
+     (if (int? f)
+         (if (equal? f "0") (str-list->int-list r) (cons (str->int f) (str-list->int-list r)))
+         (error 'str-list->int-list "invalid line in cnf file, given ~a" (string-join l)))]))
 
 (main)
