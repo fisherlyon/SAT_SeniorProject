@@ -8,7 +8,7 @@ Statistics obtained using HyperFine -- A Command-line Benchmarking Tool
 
 ...
 
-## Data Definitions (formula-definitions.rkt)
+## Data Definitions (form-def.rkt)
 
 ### Formula EBNF:
 
@@ -61,9 +61,9 @@ Where...
 
 ## Tseitin Transformation (tseitin.rkt)
 
-## Brute Force SAT Solver (bf_force_sat.rkt)
+## Brute Force SAT Solver (bf-sat.rkt)
 
-## CNF File Creation (write_cnf.rkt)
+## CNF File Creation (write-cnf.rkt)
 The core purpose of this program is to take an arbitrary boolean formula, convert it to CNF, and put that transformation into a file with the DIMACS .cnf format. This file format is used commonly in modern SAT solvers.<br>
 For DIMACS .cnf form:
 - Lines that begin with 'c' are comment lines.
@@ -79,5 +79,5 @@ ex. (A v B) ∧ (C v ¬D) <==> (& (v A B) (v C (~ D))) <==> (& (v 1 2) (v 3 -4))
             3 -4 0
 ```
 
-## Testing SAT by Reading a CNF File (read_cnf.rkt)
+## Testing SAT by Reading a CNF File (read-cnf.rkt)
 ...
