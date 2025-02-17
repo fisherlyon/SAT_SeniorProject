@@ -1,6 +1,9 @@
 # Welcome to my SAT Solver Senior Project
 To learn more about the goal of this project, please view the Proposal and Sprint documents.<br>
 
+## Statistics
+Statistics obtained using HyperFine -- A Command-line Benchmarking Tool
+
 ## Running
 
 ...
