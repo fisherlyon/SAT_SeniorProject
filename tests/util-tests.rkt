@@ -1,7 +1,7 @@
 #lang typed/racket
 
 (require typed/rackunit)
-(require "../src/formula-definitions.rkt")
+(require "../src/form-def.rkt")
 (require "../src/util.rkt")
 
 ; Test Cases for Utility Functions

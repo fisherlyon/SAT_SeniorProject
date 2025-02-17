@@ -1,7 +1,7 @@
 #lang typed/racket
 
 (require typed/rackunit)
-(require "formula-definitions.rkt")
+(require "form-def.rkt")
 (require "util.rkt")
 (provide (all-defined-out))
 

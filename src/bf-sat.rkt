@@ -1,6 +1,7 @@
 #lang typed/racket
 
 (require typed/rackunit)
+(require "form-def.rkt")
 (require "tseitin.rkt") ; adding usage of Formulas and tseitin
 (provide reformat extract-vars build-list subst-nums-for-vars interp get-sat-result bin-to-bool padded-binary)
 

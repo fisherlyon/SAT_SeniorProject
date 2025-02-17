@@ -1,6 +1,6 @@
 #lang typed/racket
 
-(require "formula-definitions.rkt")
+(require "form-def.rkt")
 (provide (all-defined-out))
 
 ; -----------------

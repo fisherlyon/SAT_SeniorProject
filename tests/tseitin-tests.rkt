@@ -2,7 +2,7 @@
 
 (require typed/rackunit)
 (require "../src/tseitin.rkt")
-(require "../src/formula-definitions.rkt")
+(require "../src/form-def.rkt")
 (require "../src/util.rkt")
 
 ; -------------------------------------
