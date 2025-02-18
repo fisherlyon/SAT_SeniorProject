@@ -32,5 +32,53 @@
 ; I = a set of literals that were either present as unit clauses in kb (∆)
 ;     or derived  by unit resolution
 ; G = a new knowledge base which results from conditioning kb (∆) on I
-(define (unit-res [kb : (Listof (Listof Integer))]) : (Values (Listof Integer) (Listof (Listof Integer)))
-  (values '() '()))
+(define (unit-res [kb : (Listof (Listof Integer))] [I : (Listof Integer)]) : (Values (Listof Integer) (Listof (Listof Integer)))
+  (define unit-clause (find-unit-clause kb))
+  (if (equal? unit-clause '{})
+      (values (reverse I) kb)
+      (unit-res (condition kb (first unit-clause)) (cons (first unit-clause) I))))
+
+; Finds unit clauses given a knowledge base
+(define (find-unit-clause [kb : (Listof (Listof Integer))]) : (Listof Integer)
+  (match kb
+    ['() '()]
+    [(cons f r) (if (equal? (length f) 1) f (find-unit-clause r))]))
+
+; MOM Heuristic: Maximum Occurrence in Minimum-sized Clauses
+; the variable ordering heuristic of choice for use in DPLL
+(define (MOM [kb : (Listof (Listof Integer))]) : Integer
+  (most-freq-lit (find-small-clauses kb (find-small-clause-size kb))))
+
+; Finds the length of the smallest clause in a knowldedge base
+(define (find-small-clause-size [kb : (Listof (Listof Integer))]) : Integer
+  (match kb
+    ['{} 0]
+    [(cons f r) (if (equal? r '{}) 
+                    (length f) 
+                    (min (length f) (find-small-clause-size r)))]))
+
+; Finds all of the clauses of length k in the knowledge base
+(define (find-small-clauses [kb : (Listof (Listof Integer))] [k : Integer]) : (Listof (Listof Integer))
+  (match kb
+    ['{} '{}]
+    [(cons f r) (if (equal? (length f) k)
+                    (cons f (find-small-clauses r k))
+                    (find-small-clauses r k))]))
+
+; Finds the most frequent literal given a list of clauses
+(define (most-freq-lit [clauses : (Listof (Listof Integer))]) : Integer
+  (define ht : (HashTable Integer Integer) (make-hash))
+  (for ([clause clauses])
+    (for ([literal clause])
+      (hash-update! ht literal add1 (lambda () 0))))
+    (mfl-help ht))
+
+; Helper for most-frequent-literal
+(define (mfl-help [ht : (HashTable Integer Integer)]) : Integer
+  (define literal 0)
+  (define max 0)
+  (for ([(key value) (in-hash ht)])
+    (if (> value max)
+        (set!-values (literal max) (values key value))
+        (void)))
+  literal)
