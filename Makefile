@@ -1,10 +1,13 @@
-all: write_cnf read_cnf
+all: sat1 sat2 dpll-sat
 
-write_cnf: write_cnf.rkt
-	raco exe -o write_cnf write_cnf.rkt
+sat1: src/sat1.rkt
+	raco exe -o sat1 src/sat1.rkt
 
-read_cnf: read_cnf.rkt
-	raco exe -o bf_sat read_cnf.rkt
+sat2: src/sat2.rkt
+	raco exe -o sat2 src/sat2.rkt
+
+dpll-sat: src/dpll-sat.rkt
+	raco exe -o dpll-sat src/dpll-sat.rkt
 
 clean: 
-	rm -rf write_cnf bf_sat
+	rm -rf sat1 sat2 dpll-sat

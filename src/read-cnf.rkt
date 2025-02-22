@@ -1,28 +1,29 @@
 #lang typed/racket
 
 #|
-The core purpose of this file is to take in a DIMACS .cnf file and run
-the brute force SAT on it.
+The core purpose of this file is to take in a DIMACS .cnf file and parse it.
+The parsed result is the knowledge base in clausal form and the number of variables.
 |#
 
-(require typed/rackunit)
-(require "tseitin.rkt")
-(require "brute_force_sat.rkt")
+(provide (all-defined-out))
+;(require typed/rackunit)
+;(require "tseitin.rkt")
+;(require "brute_force_sat.rkt")
 
 ; the main -- to be ran from the command line, takes in a filename, tests satisfiability [and writes results to output file]
-(define (main) : Void
-  (define args (vector->list (current-command-line-arguments)))
-  (define n (length args))
-  (if (not (or (equal? n 1) (equal? n 2)))
-      (printf "Usage: racket read_cnf <in_filename> [<out_filename>]")
-      (begin
-        (let-values ([(cnf num-vars) (parse-file (first args))])
-          (define result (interp cnf -1 num-vars #f))
-          (if (equal? result -1)
-              (printf "UNSAT\n")
-              (begin
-                (printf "SAT\n")
-                (printf "~a0\n" (get-sat-result (build-list num-vars add1) (bin-to-bool (padded-binary result num-vars))))))))))
+;; (define (main) : Void
+;;   (define args (vector->list (current-command-line-arguments)))
+;;   (define n (length args))
+;;   (if (not (or (equal? n 1) (equal? n 2)))
+;;       (printf "Usage: racket read_cnf <in_filename> [<out_filename>]")
+;;       (begin
+;;         (let-values ([(cnf num-vars) (parse-file (first args))])
+;;           (define result (interp cnf -1 num-vars #f))
+;;           (if (equal? result -1)
+;;               (printf "UNSAT\n")
+;;               (begin
+;;                 (printf "SAT\n")
+;;                 (printf "~a0\n" (get-sat-result (build-list num-vars add1) (bin-to-bool (padded-binary result num-vars))))))))))
 
 ; will parse the input cnf file, returning the cnf list and the number of variables
 (define (parse-file [file : String]) : (Values (Listof (Listof Integer)) Integer)
@@ -41,7 +42,7 @@ the brute force SAT on it.
       [(list nums ...)
        (if (int-list? line-list)
            (set! cnf-list (cons (str-list->int-list line-list) cnf-list))
-           (error 'parse-file "Invalid CNF line, given ~a" (string-join line-list)))]))
+           (error 'parse-file "Invalid CNF line, given ~a\n" (string-join line-list)))]))
   (close-input-port in-port)
   (values (reverse cnf-list) num-vars))
 
@@ -68,4 +69,4 @@ the brute force SAT on it.
          (if (equal? f "0") (str-list->int-list r) (cons (str->int f) (str-list->int-list r)))
          (error 'str-list->int-list "invalid line in cnf file, given ~a" (string-join l)))]))
 
-(main)
+;;(main)

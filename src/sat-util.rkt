@@ -35,7 +35,7 @@
 (define (unit-res [kb : (Listof (Listof Integer))] [I : (Listof Integer)]) : (Values (Listof Integer) (Listof (Listof Integer)))
   (define unit-clause (find-unit-clause kb))
   (if (equal? unit-clause '{})
-      (values (reverse I) kb)
+      (values I kb)
       (unit-res (condition kb (first unit-clause)) (cons (first unit-clause) I))))
 
 ; Finds unit clauses given a knowledge base
@@ -47,7 +47,7 @@
 ; MOM Heuristic: Maximum Occurrence in Minimum-sized Clauses
 ; the variable ordering heuristic of choice for use in DPLL
 (define (MOM [kb : (Listof (Listof Integer))]) : Integer
-  (most-freq-lit (find-small-clauses kb (find-small-clause-size kb))))
+  (most-freq-var (find-small-clauses kb (find-small-clause-size kb))))
 
 ; Finds the length of the smallest clause in a knowldedge base
 (define (find-small-clause-size [kb : (Listof (Listof Integer))]) : Integer
@@ -66,19 +66,27 @@
                     (find-small-clauses r k))]))
 
 ; Finds the most frequent literal given a list of clauses
-(define (most-freq-lit [clauses : (Listof (Listof Integer))]) : Integer
+(define (most-freq-var [clauses : (Listof (Listof Integer))]) : Integer
   (define ht : (HashTable Integer Integer) (make-hash))
   (for ([clause clauses])
     (for ([literal clause])
-      (hash-update! ht literal add1 (lambda () 0))))
-    (mfl-help ht))
+      (hash-update! ht (abs literal) add1 (lambda () 0)))) ; want variable, not just literal
+    (mfv-help ht))
 
 ; Helper for most-frequent-literal
-(define (mfl-help [ht : (HashTable Integer Integer)]) : Integer
+(define (mfv-help [ht : (HashTable Integer Integer)]) : Integer
   (define literal 0)
   (define max 0)
   (for ([(key value) (in-hash ht)])
     (if (> value max)
-        (set!-values (literal max) (values key value))
+        (begin
+          (set! max value)
+          (set! literal key))
         (void)))
   literal)
+
+; turns a list of integers to a strings of integers
+(define (tva->string [tva : (Listof Integer)]) : String
+  (match tva
+    ['() ""]
+    [(cons f r) (string-append (number->string f) " " (tva->string r))]))
