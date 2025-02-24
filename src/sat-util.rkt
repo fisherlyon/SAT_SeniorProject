@@ -9,11 +9,16 @@
 (define (condition [kb : (Listof (Listof Integer))] [l : Integer]) : (Listof (Listof Integer))
   (match kb
     ['{} '{}]
+    ['{{}} '{{}}]
     [(cons f r)
      (match (condition-help f l)
        [#t (condition r l)] ; clause = #t, remove clause from kb
        ['{} '{{}}] ; empty clause, contradiction
-       [(list p ...) (cons (apply list p) (condition r l))])]))
+       [(list p ...)
+        (let ([rest (condition r l)])
+          (if (equal? rest '{{}}) ; check if the next call contains a contradiction
+              '{{}}
+              (cons (apply list p) rest)))])]))
 
 ; conditions a single clause on a literal
 (define (condition-help [clause : (Listof Integer)] [l : Integer]) : (U Boolean (Listof Integer))
