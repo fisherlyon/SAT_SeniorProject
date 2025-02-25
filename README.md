@@ -47,7 +47,7 @@ Where...
     <-> = Biconditional
 ```
 By the stated data definitions, the above formula in Racket would look like the following:
-```racket
+```
 (v (& A (~ B) C) (-> D (<-> E (~ F))) G)
 ```
 Where...
