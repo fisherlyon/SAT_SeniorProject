@@ -12,7 +12,7 @@ Statistics obtained using HyperFine -- A Command-line Benchmarking Tool
 
 ### Formula EBNF:
 
-```ebnf
+```
 <Formula> ::= <var> | <aux>             // Boolean variable or auxiliary variable
             | (~ Formula)               // Negation of a boolean formula
             | (& (Listof Formula))      // Conjunction of boolean formulas
