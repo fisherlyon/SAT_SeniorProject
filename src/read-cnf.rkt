@@ -40,9 +40,10 @@ The parsed result is the knowledge base in clausal form and the number of variab
            (error 'parse-file "Invalid 'p' line in CNF file, given ~a" line))]
       [(list "c" text ...) (void)] ; ignore comment lines
       [(list nums ...)
-       (if (int-list? line-list)
+       (if (and (int-list? line-list) (> (length line-list) 1))
            (set! cnf-list (cons (str-list->int-list line-list) cnf-list))
-           (error 'parse-file "Invalid CNF line, given ~a\n" (string-join line-list)))]))
+           (void))]
+      [_ (void)]))
   (close-input-port in-port)
   (values (reverse cnf-list) num-vars))
 

@@ -30,7 +30,7 @@
   (define args (vector->list (current-command-line-arguments)))
   (define n (length args))
   (if (or (> n 2) (< n 1))
-      (printf "Usage: ./dpll-sat <in_filename> [<out_filename>]\n")
+      (printf "Usage: ./sat1 <in_filename> [<out_filename>]\n")
       (let-values ([(cnf num-vars) (parse-file (first args))])
         (define result (sat1 cnf num-vars -1 (build-list num-vars add1) '()))
         (define (output-fun) : Void
@@ -40,7 +40,7 @@
              (printf "SAT\n")
              (printf "~a0\n" (tva->string (apply list p)))]))
         (if (= n 2)
-            (with-output-to-file (list-ref args 2) output-fun #:exists 'replace)
+            (with-output-to-file (list-ref args 1) output-fun #:exists 'replace)
             (output-fun)))))
 
 (main)

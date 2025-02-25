@@ -42,7 +42,7 @@
              (printf "~a0\n"
                      (tva->string (sort (apply list p) (lambda ([x : Integer] [y : Integer]) (< (abs x) (abs y))))))]))
         (if (= n 2)
-            (with-output-to-file (list-ref args 2) output-fun #:exists 'replace)
+            (with-output-to-file (list-ref args 1) output-fun #:exists 'replace)
             (output-fun)))))
 
 (main)
