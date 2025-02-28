@@ -22,7 +22,7 @@ Statistics obtained using HyperFine -- A Command-line Benchmarking Tool
 ```
 
 ### Racket Implementation:
-```
+```racket
 (define-type Formula (U varF auxF notF andF orF condF bicondF))
 (struct varF ([var : Symbol]) #:transparent)
 (struct auxF ([aux : Symbol]) #:transparent)
