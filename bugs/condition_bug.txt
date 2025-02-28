@@ -2,7 +2,7 @@ Bug:
 MOM is returning 0, which is caused as a result of there not being a smallest clause?
 The knowledge base after unit resolution has '{} in it, meaning a contradiction, but this shouldn't happen.
 It should be caught earlier I think.
-Also, appending was silly for recursive case, had multiple variables in result. BUT THIS SHOULDN'T HAPPEN EITHER.
+
 Found problem:
 
 > (condition '((1 2 3) (2 3) ()) 1)
@@ -12,7 +12,7 @@ Found problem:
 - : (Listof (Listof Integer))
 '((2 3) ())
 
-Here, condition should return '{{}}', not what it does.
+Here, condition should return '{{}} since it contains '{} which defines a contradiction.
 
 Maybe fixed by adding a check for the next call to condition, making sure that it isn't a contradiction.
 

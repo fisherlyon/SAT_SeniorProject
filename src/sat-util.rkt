@@ -37,7 +37,8 @@
 ; I = a set of literals that were either present as unit clauses in kb (∆)
 ;     or derived  by unit resolution
 ; G = a new knowledge base which results from conditioning kb (∆) on I
-(define (unit-res [kb : (Listof (Listof Integer))] [I : (Listof Integer)]) : (Values (Listof Integer) (Listof (Listof Integer)))
+(define (unit-res [kb : (Listof (Listof Integer))] [I : (Listof Integer)])
+  : (Values (Listof Integer) (Listof (Listof Integer)))
   (define unit-clause (find-unit-clause kb))
   (if (equal? unit-clause '{})
       (values I kb)

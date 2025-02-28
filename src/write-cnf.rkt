@@ -34,17 +34,6 @@ This file format is used commonly in modern SAT solvers.
       #:mode 'text
       #:exists 'replace)))
 
-; given SAT result, append the TVA to the end of a .cnf file as unit clauses for testing SAT correctness
-(define (write-check [filename : String] [tva : (Listof Integer)]) : Void
-  (with-output-to-file filename
-    (lambda ()
-      (printf "c\nc Begin Unit Clause TVA Check\nc\n")
-      (for ([u tva])
-        (printf "~a 0\n" u))
-      (printf "c\nc End Unit Clause TVA Check\nc\n"))
-    #:mode 'text
-    #:exists 'append))
-
 ; retrieves the name of a file from the user
 (define (get-filename) : String
   (display "Enter the CNF filename: ")
