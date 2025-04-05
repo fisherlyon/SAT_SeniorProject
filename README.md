@@ -67,6 +67,27 @@ This SAT solver implementation checks every possible truth value assignment (TVA
 Usage: ./bf-sat <in_filename> [<out_filename>]
 ```
 
+# SAT-I SAT Solver (sat1.rkt)
+This SAT solver implementation utilizes Depth-First-Search (DFS) and returns a complete variable instantiation (truth value assignment). It also uses the idea of conditioning. When traversing the tree, at each level, a TVA is assigned to a variable. By conditioning the knowledge base (boolean formula) on the variable given its TVA, we can reduce the size of the knowledge base until either SAT or UNSAT is returned. As previously stated, this variation returns a complete variable instantiation, meaning we have conditioned the knowledge base on every variable.<br>
+```
+Usage: ./sat1 <in_filename> [<out_filename>]
+```
+
+# SAT-II SAT Solver (sat2.rkt)
+This SAT solver implementation is just an extension of the previoiusly mentioned SAT-I. The only difference between SAT-II and SAT-I is that SAT-II returns a partial variable instantiation. This can be done due to the fact that it isn't always necessary to traverse the tree all the way down to a leaf node in order to have SAT returned.
+```
+Usage: ./sat2 <in_filename> [<out_filename>]
+```
+
+# DPLL SAT Solver (dpll-sat.rkt)
+This SAT solver implementation heavily relies on the idea of unit resolution, which reduces the clausal form  of a knowledge base based on unit clauses (clauses of size one). Unit resolution returns a set of literals that were either present as unit clauses in the knowledge base or derived by unit resolution (I), and a new knowledge base which results from conditioning the knowledge base on I (Γ). When Γ is empty, SAT is returned, and if there is a contradiction in Γ, then UNSAT is returned. For this method to progress, literals are chosen, using a heuristic, to be added to Γ as a clause for unit resolution. The heuristic used in the provided code is called "Maximum Occurrence in Minimum-sized Clauses" (MOM). When SAT is achieved, I is returned.
+```
+Usage: ./dpll-sat <in_filename> [<out_filename>]
+```
+
+# CDCL SAT Solver (cdcl-sat.rkt)
+
+
 ## CNF File Creation (write-cnf.rkt)
 The core purpose of this program is to take an arbitrary boolean formula, convert it to CNF, and put that transformation into a file with the DIMACS .cnf format. This file format is used commonly in modern SAT solvers.<br>
 For DIMACS .cnf form:
