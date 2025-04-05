@@ -67,26 +67,29 @@ This SAT solver implementation checks every possible truth value assignment (TVA
 Usage: ./bf-sat <in_filename> [<out_filename>]
 ```
 
-# SAT-I SAT Solver (sat1.rkt)
+## SAT-I SAT Solver (sat1.rkt)
 This SAT solver implementation utilizes Depth-First-Search (DFS) and returns a complete variable instantiation (truth value assignment). It also uses the idea of conditioning. When traversing the tree, at each level, a TVA is assigned to a variable. By conditioning the knowledge base (boolean formula) on the variable given its TVA, we can reduce the size of the knowledge base until either SAT or UNSAT is returned. As previously stated, this variation returns a complete variable instantiation, meaning we have conditioned the knowledge base on every variable.<br>
 ```
 Usage: ./sat1 <in_filename> [<out_filename>]
 ```
 
-# SAT-II SAT Solver (sat2.rkt)
-This SAT solver implementation is just an extension of the previoiusly mentioned SAT-I. The only difference between SAT-II and SAT-I is that SAT-II returns a partial variable instantiation. This can be done due to the fact that it isn't always necessary to traverse the tree all the way down to a leaf node in order to have SAT returned.
+## SAT-II SAT Solver (sat2.rkt)
+This SAT solver implementation is just an extension of the previoiusly mentioned SAT-I. The only difference between SAT-II and SAT-I is that SAT-II returns a partial variable instantiation. This can be done due to the fact that it isn't always necessary to traverse the tree all the way down to a leaf node in order to have SAT returned.<br>
 ```
 Usage: ./sat2 <in_filename> [<out_filename>]
 ```
 
-# DPLL SAT Solver (dpll-sat.rkt)
-This SAT solver implementation heavily relies on the idea of unit resolution, which reduces the clausal form  of a knowledge base based on unit clauses (clauses of size one). Unit resolution returns a set of literals that were either present as unit clauses in the knowledge base or derived by unit resolution (I), and a new knowledge base which results from conditioning the knowledge base on I (Γ). When Γ is empty, SAT is returned, and if there is a contradiction in Γ, then UNSAT is returned. For this method to progress, literals are chosen, using a heuristic, to be added to Γ as a clause for unit resolution. The heuristic used in the provided code is called "Maximum Occurrence in Minimum-sized Clauses" (MOM). When SAT is achieved, I is returned.
+## DPLL SAT Solver (dpll-sat.rkt)
+This SAT solver implementation utilizes the David-Putnam-Logemann-Loveland (DPLL) algorithm and heavily relies on the idea of unit resolution, which reduces the clausal form  of a knowledge base based on unit clauses (clauses of size one). Unit resolution returns a set of literals that were either present as unit clauses in the knowledge base or derived by unit resolution (I), and a new knowledge base which results from conditioning the knowledge base on I (Γ). When Γ is empty, SAT is returned, and if there is a contradiction in Γ, then UNSAT is returned. For this method to progress, literals are chosen, using a heuristic, to be added to Γ as a clause for unit resolution. The heuristic used in the provided code is called "Maximum Occurrence in Minimum-sized Clauses" (MOM). When SAT is achieved, I is returned.<br>
 ```
 Usage: ./dpll-sat <in_filename> [<out_filename>]
 ```
 
-# CDCL SAT Solver (cdcl-sat.rkt)
-
+## CDCL SAT Solver (cdcl-sat.rkt)
+This SAT solver implementation utilizes the idea of Conflict-Driven Clause Learning (CDCL). This version also uses unit resolution, but it is different than the one used in DPLL as it also takes in a decision sequence (D) and a set of learned clauses (Γ). The general idea of this algorithm is that many decisions--literals to be added as clauses to the knowledge base for unit resolution--are made and once a conflict/contradiction is reached, we analyze it. This is done by constucting an implication graph to see what decisions and implications ultimately led up to the contradiction. From analyzing of the implication graph, we are able to derive learned clauses that we can add to Γ that are implied by the knowledge base. In the provided code, an asserting learned clause is chosen based on a heuristic called the first UIP. A UIP (unique implication point) in the implication graph is a dominator from the decision made at the highest level to the contradiction. A dominator is a node in the graph that is passed through in all possible paths from the source node (decision node made at the highest decision level) to a target node (contradiction). The first UIP is the UIP that is the closest to the contradiction. Once the asserting clause is derived by creating cuts in the implication graph, we back-track to the decision level where the contradiction originated. When a literal is chosen to be a decision, it must be the case that neither itself or its negation is implied by unit resolution. This process runs until either unit resolution doesn't detect a contradiction and there aren't any more literals to be chosen, in which SAT is returned along with I, or if unit resolution detects a contradiction and the decision sequence D is empty, in which UNSAT is returned.<br>
+```
+Usage: ./cdcl-sat <in_filename> [<out_filename>]
+```
 
 ## CNF File Creation (write-cnf.rkt)
 The core purpose of this program is to take an arbitrary boolean formula, convert it to CNF, and put that transformation into a file with the DIMACS .cnf format. This file format is used commonly in modern SAT solvers.<br>
