@@ -1,0 +1,25 @@
+I = (-13 -4)
+temp-kb = ((-18 19) (3 18 -5) (-5 -8 -15) (-20 7 -16) (-12 -9 17) (17 19 5) (-16 9 15) (11 -5 -14) (18 -10) (-3 11 12) (-6 -17 -8) (-18 14 1) (-19 -15 10) (12 18 -19) (-8 7) (-8 -9) (7 17 -15) (12 -7 -14) (-10 -11 8) (2 -15 -11) (9 6 1) (-11 20 -17) (9 -15) (12 -7 -17) (-18 -2 20) (20 12) (19 11 14) (-1 -17 -19) (12 -14 -7) (-7 16 10) (6 10 7) (20 14 -16) (-19 17 11) (-7 1 -20) (-5 12 15) (12 -11 -7) (-5 19 -8) (1 16 17) (20 -14 -15) (14 7 10) (-5 9 20) (10 1 -19) (-16 -15 -1) (16 3 -11) (-15 -10) (-15 -3) (-10 -16 11) (-8 12 -5) (14 -6 12) (1 6 11) (-7 -2 12) (1 -20 19) (15 18) (-11 14 9) (-6 -15 -2) (5 -12 -15) (-6 17 5) (20 -1 14) (9 -17 15) (-5 19 -18) (-12 8 -10) (15 -9) (9 -5 -1) (10 -19 -14) (20 9) (-9 -2 19) (-5 -17) (2 -10 -18) (-18 3 11) (7 -9 17) (-15 -6 -3) (12 3 -2) (-2 -3 17) (20 -15 -16) (-5 -17 -19) (-20 -18 11) (-9 1 -5) (-19 9 17) (12 -2 17) (-16 -5) (-18 20) (-3 11) (10 7))
+D = #&()
+G = ((-18 20) (-3 11) (13 -4) (10 7) (-13 5) (-13))
+
+I = (-13 -4 -18 -10 15 -19 9 -8 -3 -5 17 -12 -7)
+temp-kb = (())
+D = #&(-18)
+G = ((-18 20) (-3 11) (13 -4) (10 7) (-13 5) (-13))
+
+
+Not really a bug, just an observation for later viewing. 
+I, which is a list of literals derived from unit resolution, has led us to a contradiction. 
+I at index 0 is -13.
+-13 is also a unit clause in G. G is the list of learnt clauses.
+When building the implication graph, I send the function (kb U G).
+Thus, -13 is in the knowledge base as a unit clause and is the first implication.
+
+This caused a problem in my find-impl-clause function, in the "Implication Stage".
+(set-diff f (list I)) ==> (set-diff {-13} {-13}) ==> {}
+    This then gets sent to a "get-level" function, where the actual error occurs.
+
+Now the problem is a false UNSAT
+For uf20-01.cnf, we are getting {13} & {-13} as asserting clauses, leading to an UNSAT
+NEED TO PREVENT THIS SOMEHOW

@@ -96,3 +96,27 @@
   (match tva
     ['() ""]
     [(cons f r) (string-append (number->string f) " " (tva->string r))]))
+
+; Turns a list of integers into a list of unit (integer) clauses
+(define (ints->clauses [unit-clauses : (Listof Integer)]) : (Listof (Listof Integer))
+  (match unit-clauses
+    ['() '()]
+    [(cons f r) (cons (list f) (ints->clauses r))]))
+
+; Set Difference Function
+(define (set-diff [A : (Listof Integer)] [B : (Listof Integer)])
+  (filter (lambda (x) (not (member x B))) A))
+
+; Erase decisions after the given assertion level (m)
+(define (erase [m : Integer] [D : (Boxof (Listof Integer))]) : Void
+  (if (equal? m -1)
+      (set-box! D '())
+      (set-box! D (take (unbox D) (min (length (unbox D)) (add1 m))))))
+
+; Adds an element to a mutable list (Boxof (Listof ...))
+(define (add [l : Integer] [D : (Boxof (Listof Integer))]) : Void
+  (set-box! D (append (unbox D) (list l))))
+
+; Returns true/false if a list contains a given element
+(define (contains [lst : (Listof Integer)] [elem : Integer])
+  (not (false? (member elem lst))))

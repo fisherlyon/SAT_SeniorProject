@@ -8,36 +8,23 @@
 ; ------------------
 
 ; An Implication Graph Node
-;; (struct decNode ; decision node
-;;   ([lit : Integer] ; decided literal
-;;    [level : Integer] ; level at which decision is made
-;;    [branches : (Listof (U implNode contrNode))])) ; out-going branches
-;; (struct implNode ; implication node
-;;   ([lit : Integer] ; implied literal
-;;    [level : Integer] ; level at which implication is made
-;;    [kb-cl : Integer] ; knowledge base clause the implication was derived from
-;;    [branches : (Listof (U implNode contrNode))])) ; out-going branches
-;; (struct contrNode ; contradiction node
-;;   ([kb-cl : Integer])) ; knowledge base clause the contradiction was derived from
-
-; An Implication Graph Node
 (struct IG-Node
   ([lit : Integer] ; corresponding literal
    [level : Integer] ; decision level
-   [reason : (Option Integer)] ; clause ID that caused this implication, or #f for decisions
+   [cause : (Option Integer)] ; clause ID that caused this implication, or #f for decisions
    [index : Integer]) ; propagation order (for walking back through the graph)
   #:transparent)
 
 ; kb = knowledge base (∆)
 ; D = a decision sequence
 ; G = a set of learned clauses
-(define (cdcl-sat [kb : (Listof (Listof Integer))]) : Boolean
+(define (cdcl-sat [kb : (Listof (Listof Integer))]) : (U Boolean (Listof Integer))
   (define D : (Boxof (Listof Integer)) (box '()))
   (define G : (Listof (Listof Integer)) '())
   (define I : (Listof Integer) '())
-  (define (while-true) : Boolean
+  (define (while-true) : (U Boolean (Listof Integer))
     (let-values ([(I temp-kb) (cdcl-unit-res kb G (unbox D) I)])
-      (printf "\ntemp-kb = ~a\nI = ~a\nD = ~a\n\n" temp-kb I (unbox D))
+      (printf "\nI = ~a\ntemp-kb = ~a\nD = ~a\nG = ~a\n" I temp-kb D G)
       (if (equal? temp-kb '{{}}) ; if unit resolution detects a contradiction
           (if (equal? (unbox D) '()) ; contradiction without any decisions
               #f
@@ -51,7 +38,7 @@
                 (begin
                   (add l D) ; add new decision to sequence D
                   (while-true)) ; loop
-                #t)))))
+                I))))) ; 
   (while-true))
 
 ; Unit Resolution for CDCL
@@ -66,8 +53,8 @@
       (values (reverse I) kb)
       (cdcl-unit-res
        (condition temp (first unit-clause))
-       G
-       '()
+       '() ; added during first iteration
+       '() ; added during first iteration
        (cons (first unit-clause) I))))
 
 ; Builds an implication graph
@@ -85,47 +72,68 @@
   (for ([i (in-range (length kb))]) ; init clauses
     (hash-set! clauses i (list-ref kb i)))
   (for ([i (in-range (length I))])
+    (printf "\nkb = ~a\nD = ~a\nI = ~a\n" kb D I)
+    (for ([(key value) (in-hash nodes)])
+      (printf "~a: ~a\n" key value))
     (set! index (add1 index)) ; increment index
     (hash-set! nodes (list-ref I i) ; add implication node
                (find-impl-clause kb (map - temp) (list-ref I i) 0 index nodes))
     (set! temp (append temp (list (list-ref I i))))) ; update temp (D U processed I)
   ; add the last contradiction node
   (hash-set! nodes 0 (find-impl-clause kb (map - temp) 0 0 (add1 index) nodes))
-  (for ([(key value) (in-hash nodes)])
-    (printf "~a: ~a\n" key value))
-  (define asserting (reverse (get-asserting (hash-keys nodes) nodes clauses)))
-  (printf "~a\n" asserting)
-  (if (equal? (length asserting) 1)
-      (values (car (first asserting)) (cdr (first asserting)))
-      (values '() 0)))
+  (define asserting (get-asserting (hash-keys nodes) nodes clauses (- (length D) 1)))
+  (printf "\nasserting clause = ~a\n" asserting)
+  (if (not (equal? (car asserting) '()))
+      (values (car asserting) (cdr asserting))
+      (error 'impl-graph "Error: Couldn't find an asserting clause.")))
+
 
 ; Returns the asserting clauses and assertion levels
 ; They are the learnt clauses that include only one variable setting
 ; at the last decision level
 (define (get-asserting [keys : (Listof Integer)]
-                            [nodes : (HashTable Integer IG-Node)]
-                            [clauses : (HashTable Integer (Listof Integer))])
-  : (Listof (Pairof (Listof Integer) Integer))
-  (match keys
-    ['() '()]
-    [(cons f r)
-     (cond
-       ; contradiction case
-       [(equal? f 0)
-        (let* ([clause (cast (hash-ref clauses (IG-Node-reason (hash-ref nodes f))) (Listof Integer))]
-               [levels (map (lambda ([cl : Integer]) (IG-Node-level (hash-ref nodes (- cl)))) clause)])
-          (if (not (has-duplicates? levels))
-              (cons (cons clause (get-assertion-level levels)) (get-asserting r nodes clauses))
-              (get-asserting r nodes clauses)))]
-       ; implication node case
-       [(not (equal? (IG-Node-reason (hash-ref nodes f)) #f)) 
-        (let* ([clause (set-diff (cast (hash-ref clauses (IG-Node-reason (hash-ref nodes f))) (Listof Integer)) (list f))]
-               [levels (map (lambda ([cl : Integer]) (IG-Node-level (hash-ref nodes (- cl)))) clause)])
-          (if (not (has-duplicates? levels))
-              (cons (cons clause (get-assertion-level levels)) (get-asserting r nodes clauses))
-              (get-asserting r nodes clauses)))]
-       ; decision node case
-       [else (get-asserting r nodes clauses)])]))
+                       [nodes : (HashTable Integer IG-Node)]
+                       [clauses : (HashTable Integer (Listof Integer))]
+                       [max-dl : Integer])
+  : (Pairof (Listof Integer) Integer)
+  (define (helper [keys : (Listof Integer)] 
+                  [best : (Pairof (Listof Integer) Integer)]
+                  [best-index : Integer])
+    : (Pairof (Listof Integer) Integer)
+    (printf "best = ~a\n" best)
+    (match keys
+      ['() best]
+      [(cons f r)
+       (cond
+         ; contradiction case
+         [(equal? f 0)
+          (let* ([clause (cast (hash-ref clauses (IG-Node-cause (hash-ref nodes f))) (Listof Integer))]
+                 [levels (map (lambda ([cl : Integer]) (IG-Node-level (hash-ref nodes (- cl)))) clause)]
+                 [node-index (IG-Node-index (hash-ref nodes f))])
+            (if (and (not (has-duplicates? levels)) (> node-index best-index))
+                (helper r 
+                       (cons clause (get-assertion-level levels))
+                       node-index)
+                (helper r best best-index)))]
+         ; implication node case
+         [(not (equal? (IG-Node-cause (hash-ref nodes f)) #f)) 
+          (let* ([clause (set-diff (cast (hash-ref clauses (IG-Node-cause (hash-ref nodes f))) (Listof Integer)) (list f))]
+                 [levels (map (lambda ([cl : Integer]) (IG-Node-level (hash-ref nodes (- cl)))) clause)]
+                 [node-index (IG-Node-index (hash-ref nodes f))])
+            (printf "\nclause = ~a\nlevels = ~a\nindex = ~a\n" clause levels node-index)
+            (printf "\n~a - ~a\n" (cast (hash-ref clauses (IG-Node-cause (hash-ref nodes f))) (Listof Integer)) (list f))
+            (if (and (not (has-duplicates? levels)) (> node-index best-index))
+                (if (equal? clause '())
+                    (helper r best best-index) ;; TO-DO
+                    (helper r 
+                       (cons clause (get-assertion-level levels))
+                       node-index))
+                (helper r best best-index)))]
+         ; decision node case
+         [else (helper r best best-index)])]))
+  
+  ; initial call with empty best clause and -1 index
+  (helper keys (cons '() 0) -1))
 
 ; Gets the assertion level of an asserting clause
 (define (get-assertion-level [levels : (Listof Integer)]) : Integer
@@ -137,21 +145,31 @@
 (define (find-impl-clause [kb : (Listof (Listof Integer))] ; knowledge base
                           [D : (Listof Integer)] ; decision sequence
                           [I : Integer] ; single implication
-                          [reason : Integer]
+                          [cause : Integer]
                           [index : Integer]
                           [nodes : (HashTable Integer IG-Node)]) ; the depth in the graph
   : IG-Node
-  (printf "fic: kb = ~a\n" kb)
   (match kb
     ['() (error "No implication found")] ; Handle case when no clause matches
     [(cons f r)
-     (if (equal? I 0) ; Contradiction stage
-         (if (implication? f D)
-             (make-ig-node I (get-level nodes f) reason index)
-             (find-impl-clause r D 0 (add1 reason) index nodes))
-         (if (and (not (equal? (member I f) #f)) (implication? f (append D (list I))))
-             (make-ig-node I (get-level nodes (set-diff f (list I))) reason index)
-             (find-impl-clause r D I (add1 reason) index nodes)))]))
+     (cond
+       ; Unit clause implication case
+       [(and (equal? (length f) 1) (equal? (first f) I))
+        (make-ig-node I 
+                      (IG-Node-level (hash-ref nodes (- (first D)))) ; level of last decision
+                      cause 
+                      index)]
+       ; Contradiction stage
+       [(equal? I 0) 
+        (if (implication? f D)
+            (make-ig-node I (get-level nodes f) cause index)
+            (find-impl-clause r D 0 (add1 cause) index nodes))]
+       ; Regular implication stage
+       [(and (not (equal? (member I f) #f)) 
+             (implication? f (append D (list I))))
+        (make-ig-node I (get-level nodes (set-diff f (list I))) cause index)]
+       ; No match found, continue searching
+       [else (find-impl-clause r D I (add1 cause) index nodes)])]))
 
 ; Checks if a given clause leads to an implication
 (define (implication? [clause : (Listof Integer)] [D+I : (Listof Integer)]) : Boolean
@@ -171,12 +189,8 @@
 
 ; Makes an Implication Graph Node
 (define (make-ig-node [val : Integer] [level : Integer]
-                      [reason : (Option Integer)] [index : Integer]) : IG-Node
-  (IG-Node val level reason index))
-
-; Set Difference Function
-(define (set-diff [A : (Listof Integer)] [B : (Listof Integer)])
-  (filter (lambda (x) (not (member x B))) A))
+                      [cause : (Option Integer)] [index : Integer]) : IG-Node
+  (IG-Node val level cause index))
 
 ; Checks if a list has duplicates or not
 (define (has-duplicates? [lst : (Listof Any)])
@@ -204,19 +218,23 @@
        [(and (equal? pos-res #f) (equal? neg-res #f)) (cons f (get-uniq-vars r I))]
        [else (get-uniq-vars r I)]))]))
 
+; allows .cnf file input upon run
+(define (main) : Void
+  (define args (vector->list (current-command-line-arguments)))
+  (define n (length args))
+  (if (or (> n 2) (< n 1))
+      (printf "Usage: ./cdcl-sat <in_filename> [<out_filename>]\n")
+      (let-values ([(cnf num-vars) (parse-file (first args))])
+        (define result (cdcl-sat cnf))
+        (define (output-fun) : Void
+          (match result
+            [#f (printf "UNSAT\n")]
+            [(list p ...)
+             (printf "SAT\n")
+             (printf "~a0\n"
+                     (tva->string (sort (apply list p) (lambda ([x : Integer] [y : Integer]) (< (abs x) (abs y))))))]))
+        (if (= n 2)
+            (with-output-to-file (list-ref args 1) output-fun #:exists 'replace)
+            (output-fun)))))
 
-; Turns a list of integers into a list of unit (integer) clauses
-(define (ints->clauses [unit-clauses : (Listof Integer)]) : (Listof (Listof Integer))
-  (match unit-clauses
-    ['() '()]
-    [(cons f r) (cons (list f) (ints->clauses r))]))
-
-; Erase decisions after the given assertion level (m)
-(define (erase [m : Integer] [D : (Boxof (Listof Integer))]) : Void
-  (if (equal? m -1)
-      (set-box! D '())
-      (set-box! D (take (unbox D) (min (length (unbox D)) (add1 m))))))
-
-; Adds an element to a mutable list (Boxof (Listof ...))
-(define (add [l : Integer] [D : (Boxof (Listof Integer))]) : Void
-  (set-box! D (append (unbox D) (list l))))
+(main)
