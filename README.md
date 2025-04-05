@@ -103,7 +103,7 @@ This SAT solver implementation utilizes the idea of Conflict-Driven Clause Learn
 Usage: ./cdcl-sat <in_filename> [<out_filename>]
 ```
 
-## CNF File Creation (write-cnf.rkt)
+## CNF File Creatihttps://www.youtube.com/playlist?list=PLlDG_zCuBub5AyHuxnw8vfgx7Wd-P-4XNon (write-cnf.rkt)
 The core purpose of this program is to take an arbitrary boolean formula, convert it to CNF, and put that transformation into a file with the DIMACS .cnf format. This file format is used commonly in modern SAT solvers.<br>
 For DIMACS .cnf form:
 - Lines that begin with 'c' are comment lines.
@@ -121,3 +121,9 @@ ex. (A v B) ∧ (C v ¬D) <==> (& (v A B) (v C (~ D))) <==> (& (v 1 2) (v 3 -4))
 
 ## Testing SAT by Reading a CNF File (read-cnf.rkt)
 ...
+
+# Resources
+The following links lead to resources that I used during the duration of this project.
+[Automated Reasoning by UCLA Automated Reasoning Group](https://www.youtube.com/playlist?list=PLlDG_zCuBub5AyHuxnw8vfgx7Wd-P-4XN)<br>
+[How to find the learned clause from a UIP cut on Computer Science Stack Exchange](https://www.youtube.com/playlist?list=PLlDG_zCuBub5AyHuxnw8vfgx7Wd-P-4XN)<br>
+
