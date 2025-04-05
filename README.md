@@ -5,8 +5,20 @@ To learn more about the goal of this project, please view the Proposal and Sprin
 Statistics obtained using HyperFine -- A Command-line Benchmarking Tool
 
 ## Running
-
-...
+In the provided code, there is a Makefile that allows the creation of executables from the command-line for the various SAT solvers and tools shown below.<br>
+To make all SAT solvers and tools:
+```make
+make all
+```
+To make specified solvers/tools:
+```make
+make bf-sat
+make sat1
+make sat2
+make dpll-sat
+make cdcl-sat
+```
+The usage of each of the solvers/tools is shown below under their descriptions.
 
 ## Data Definitions (form-def.rkt)
 
