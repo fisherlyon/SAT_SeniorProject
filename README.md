@@ -125,5 +125,5 @@ ex. (A v B) ∧ (C v ¬D) <==> (& (v A B) (v C (~ D))) <==> (& (v 1 2) (v 3 -4))
 # Resources
 The following links lead to resources that I used during the duration of this project.<br>
 [Automated Reasoning by UCLA Automated Reasoning Group](https://www.youtube.com/playlist?list=PLlDG_zCuBub5AyHuxnw8vfgx7Wd-P-4XN)<br>
-[How to find the learned clause from a UIP cut on Computer Science Stack Exchange](https://www.youtube.com/playlist?list=PLlDG_zCuBub5AyHuxnw8vfgx7Wd-P-4XN)<br>
+[How to find the learned clause from a UIP cut on Computer Science Stack Exchange](https://cs.stackexchange.com/questions/163098/how-to-find-the-learned-clause-from-a-uip-cut)<br>
 
