@@ -126,4 +126,9 @@ ex. (A v B) ∧ (C v ¬D) <==> (& (v A B) (v C (~ D))) <==> (& (v 1 2) (v 3 -4))
 The following links lead to resources that I used during the duration of this project.<br>
 [Automated Reasoning by UCLA Automated Reasoning Group](https://www.youtube.com/playlist?list=PLlDG_zCuBub5AyHuxnw8vfgx7Wd-P-4XN)<br>
 [How to find the learned clause from a UIP cut on Computer Science Stack Exchange](https://cs.stackexchange.com/questions/163098/how-to-find-the-learned-clause-from-a-uip-cut)<br>
+[Module 5 - Tseitin transformation by EKU - Logical Foundations of Computer Science](https://www.youtube.com/watch?v=fd9gjzZE1-4)
+[CNF Files](https://people.sc.fsu.edu/%7Ejburkardt/data/cnf/cnf.html)
+[Public CNF Benchmark Files](https://github.com/prokls/cnf-files-download)
+[MiniSAT SAT Solver](https://github.com/niklasso/minisat)
+[MiniSAT User Guide: How to use the MiniSAT SAT Solver](https://dwheeler.com/essays/minisat-user-guide.html)
 
