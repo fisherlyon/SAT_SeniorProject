@@ -137,7 +137,7 @@ ex. (A v B) ∧ (C v ¬D) <==> (& (v A B) (v C (~ D))) <==> (& (v 1 2) (v 3 -4))
 Usage: ./write_cnf <filename> <boolean_formula>
     - filename : the file name of the .cnf file to be written to
     - boolean_formula : the boolean formula to be converted to CNF and then written
-    - <b>NOTE : the given formula must be provided in the form described above under "Data Definitions"</b>
+    - NOTE : the given formula must be provided in the form described above under "Data Definitions"
 ```
 
 ## Resources
