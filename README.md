@@ -73,6 +73,8 @@ Where...
 
 ## Tseitin Transformation (tseitin.rkt)
 
+# SAT Solver Implementations
+
 ## Brute Force SAT Solver (bf-sat.rkt)
 This SAT solver implementation checks every possible truth value assignment (TVA) starting by setting all variables in a boolean formula to false, then working up to setting all variables being true. For a formula with <i>n</i> boolean variables, there are 2<sup>n</sup> possible TVAs. So, in order to test all possible TVAs, the program uses the binary representation of integers from 0 to 2<sup>n-1</sup>, assigning each bit in the integer to a variable in the boolean formula. After an UNSAT, the current TVA integer is incremented to TVA+1, then that is tested. Once one of the TVAs returns SAT, that TVA is returned.<br>
 ```
