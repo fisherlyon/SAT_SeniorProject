@@ -71,8 +71,6 @@ Where...
     <-> = Biconditional
 ```
 
-# Tseitin Transformation (tseitin.rkt)
-
 ## SAT Solver Implementations
 
 ### Brute Force SAT Solver (bf-sat.rkt)
@@ -105,7 +103,12 @@ This SAT solver implementation utilizes the idea of Conflict-Driven Clause Learn
 Usage: ./cdcl-sat <in_filename> [<out_filename>]
 ```
 
-## CNF File Creation (write-cnf.rkt)
+## CNF Tools
+
+### Tseitin Transformation (tseitin.rkt)
+...
+
+### CNF File Creation (write-cnf.rkt)
 The core purpose of this program is to take an arbitrary boolean formula, convert it to CNF, and put that transformation into a file with the DIMACS .cnf format. This file format is used commonly in modern SAT solvers.<br>
 For DIMACS .cnf form:
 - Lines that begin with 'c' are comment lines.
