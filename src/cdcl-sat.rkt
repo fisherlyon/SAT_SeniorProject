@@ -66,7 +66,7 @@
                 (erase m D) ; erase decisons past the resulting assertion level
                 (set! G (append G (list a))) ; add the learned/asserting clause to G
                 (while-true)))
-          (let ([l (next-decision new-kb I)]) ; get the next decision
+          (let ([l (if (empty? new-kb) 0 (first (first new-kb)))]) ; get the next decision
             ; if l is a literal where neither l or ¬l are implied by unit resolution
             (if (not (equal? l 0))
                 (begin

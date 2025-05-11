@@ -1,4 +1,4 @@
-#lang typed/racket
+P#lang typed/racket
 
 (require "sat-util.rkt")
 (require "read-cnf.rkt")
