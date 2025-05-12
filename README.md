@@ -5,7 +5,7 @@ To learn more about the goal of this project, please view the Proposal and Sprin
 Statistics obtained using HyperFine -- A Command-line Benchmarking Tool
 
 ## Running
-In the provided code, there is a Makefile that allows the creation of executables from the command-line for the various SAT solvers and tools shown below.<br>
+In the provided code, there is a Makefile that allows the creation of executables from the command-line for the various SAT solvers and tools shown below.
 The Makefile uses raco to create executables of the Racket files, so please make sure that [Racket](https://download.racket-lang.org/) is installed prior to running the Makefile.<br>
 To make all SAT solvers and tools:
 ```make
