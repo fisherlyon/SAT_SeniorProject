@@ -147,6 +147,16 @@ Usage: ./write_cnf <filename> <boolean_formula>
  - NOTE : the given formula must be provided in the form described above under "Data Definitions"
 ```
 
+### Make Check (make-check.rkt)
+This program was made as a tool for myself so that I could test the SAT implementations with a known, working SAT sovler implementation. When testing satisfiability using one of the SAT solvers above, the user has the option to write the output to an output file. That output file is used, in conjunction with a copy of the originally tested .cnf file to make a "SAT-Check" file. The SAT-Check file is also a .cnf file, but at the end, there is the appended, given SAT output. By appending the SAT output to the original .cnf file, it adds a series of unit clauses to the original knowledge base that correspond to the TVA of the SAT output. When running this new .cnf file through a known, working SAT solver, it ensures that the given SAT output is valid, and also further ensures that my SAT implementations are correct!
+```
+Usage: ./make-check <SAT_OUT> <check_filename>
+
+ - SAT_OUT : the file name of the output from a satisfiability test
+ - check_filename : the file name of the .cnf file that was tested on
+ - NOTE : it is recommended that 'check_filename' is a copy of the original .cnf file because text appending occurs to the file
+```
+
 ## Resources
 The following links lead to resources that I used during the duration of this project.<br>
 - [Automated Reasoning by UCLA Automated Reasoning Group](https://www.youtube.com/playlist?list=PLlDG_zCuBub5AyHuxnw8vfgx7Wd-P-4XN)<br>
