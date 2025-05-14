@@ -7,8 +7,8 @@ This file format is used commonly in modern SAT solvers.
 |#
 
 (provide (all-defined-out))
-(require "util.rkt")
 (require "tseitin.rkt") ; adding usage of Formulas and tseitin
+(require "bf-sat.rkt")
 
 ; the main -- to be ran from the command line, takes in a filename and a formula, returns the cnf file
 (define (main) : Void

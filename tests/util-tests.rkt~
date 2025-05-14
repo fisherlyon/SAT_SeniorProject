@@ -92,17 +92,3 @@
 ; invalid-var? tests
 (check-equal? (invalid-var? '~) #t)
 (check-equal? (invalid-var? '<-) #f)
-
-; reformat tests
-(check-equal?
- (reformat (andF (list (orF (list (notF (varF 'a)) (varF 'b))) (varF 'c) (varF 'd) (notF (varF 'e)))))
- (list
- (list (notF (varF 'e)))
- (list (varF 'd))
- (list (varF 'c))
- (list (notF (varF 'a)) (varF 'b))))
-
-; extract-vars tests
-(check-equal?
- (extract-vars (reformat (andF (list (orF (list (notF (varF 'a)) (varF 'b))) (varF 'c) (varF 'd) (notF (varF 'e))))) '())
- '(a b c d e))

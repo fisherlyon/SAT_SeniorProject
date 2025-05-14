@@ -72,3 +72,66 @@
   (match sym
     [(or '~ '& 'v '-> '<->) #t]
     [_ #f]))
+
+; reformat cnf to list of list of formulas
+(define (reformat [form : Formula]) : (Listof (Listof Formula))
+  (match form
+    [(andF forms)
+     (foldl (lambda ([f : Formula] [acc : (Listof (Listof Formula))])
+              (match f
+                [(varF var) (cons (list f) acc)]
+                [(notF (varF var)) (cons (list f) acc)]
+                [(auxF var) (cons (list f) acc)]
+                [(orF frs) (cons frs acc)]
+                [_ (error 'reformat "invalid cnf, given ~e" f)]))
+            '()
+            forms)]))
+
+; extract variables from cnf and sort them
+(define (extract-vars [cnf : (Listof (Listof Formula))] [result : (Listof Symbol)]) : (Listof Symbol)
+  (match cnf
+    ['() (sort result symbol<?)]
+    [(cons f r)
+     (extract-vars
+      r
+      (foldl (lambda ([form : Formula] [acc : (Listof Symbol)])
+               (match form
+                 [(varF var) (if (member var acc) acc (cons var acc))]
+                 [(auxF var) (if (member var acc) acc (cons var acc))]
+                 [(notF (varF var)) (if (member var acc) acc (cons var acc))]
+                 [(notF (auxF var)) (if (member var acc) acc (cons var acc))]
+                 [_ (error 'extract-vars "invalid cnf, given ~e" form)]))
+             result
+             f))]))
+
+; sub in numbers for variables in the reformatted cnf
+(define (subst-nums-for-vars [forms : (Listof (Listof Formula))] [vars : (Listof Symbol)] [nums : (Listof Integer)]) : (Listof (Listof Integer))
+  (match forms
+    ['() '()]
+    [(cons f r) (cons (single-form-subst f vars nums) (subst-nums-for-vars r vars nums))]))
+
+; subs in a list of numbers for a list of variables in a formula
+(define (single-form-subst [form : (Listof Formula)] [vars : (Listof Symbol)] [nums : (Listof Integer)]) : (Listof Integer)
+  (match (list vars nums)
+    [(list '() '()) '()]
+    [(list (cons f1 r1) (cons f2 r2)) (append (single-num-var-subst form f1 f2) (single-form-subst form r1 r2))]))
+
+; helper for subst numbers -- subs in a number for a variable in a formula
+(define (single-num-var-subst [form : (Listof Formula)] [var : Symbol] [num : Integer]) : (Listof Integer)
+  (match form
+    ['() '()]
+    [(cons f r)
+     (match f
+       [(varF v) (if (equal? v var)
+                     (cons num (single-num-var-subst r var num))
+                     (single-num-var-subst r var num))]
+       [(auxF v) (if (equal? v var)
+                     (cons num (single-num-var-subst r var num))
+                     (single-num-var-subst r var num))]
+       [(notF (varF v)) (if (equal? v var)
+                            (cons (- num) (single-num-var-subst r var num))
+                            (single-num-var-subst r var num))]
+       [(notF (auxF v)) (if (equal? v var)
+                            (cons (- num) (single-num-var-subst r var num))
+                            (single-num-var-subst r var num))]
+       [_ (error 'single-num-var-subst "invalid var, given ~e" f)])]))
