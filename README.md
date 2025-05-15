@@ -131,8 +131,9 @@ For DIMACS .cnf form:
 - The line that begins with 'p' is the header/problem line. The 'p' is followed by the problem type, which in our case is 'cnf'. After the problem type, the number of variables is stated, followed by the number of clauses.
 - The remaining lines are the clauses of the formula, where each line is a disjunct terminated by a '0'. Positive boolean variables are represented by positive integers and the negation of a boolean variable is represnted by a negative integer. 
 ```
-ex. (A v B) ∧ (C v ¬D) <==> (& (v A B) (v C (~ D))) <==> (& (v 1 2) (v 3 -4))
-
+ex. (& (v A B) (v C (~ D)))
+ => (& (v 1 2) (v 3 -4))
+ =>
             c FILE: <filename>
             c
             p cnf 4 2
@@ -140,11 +141,15 @@ ex. (A v B) ∧ (C v ¬D) <==> (& (v A B) (v C (~ D))) <==> (& (v 1 2) (v 3 -4))
             3 -4 0
 ```
 ```
-Usage: ./write_cnf <filename> <boolean_formula>
+Usage: ./write-cnf -c <filename> "<boolean_formula>"
+Usage: ./write-cnf -f <filename> <boolean_formula_filename>
 
- - filename : the file name of the .cnf file to be written to
- - boolean_formula : the boolean formula to be converted to CNF and then written
- - NOTE : the given formula must be provided in the form described above under "Data Definitions"
+ • -c : Run write-cnf with command-line boolean formula
+ • -f : Run write-cnf with in-file boolean formula
+ • filename : The file name of the .cnf file to be written to
+ • boolean_formula : The boolean formula to be converted (must be in quotes)
+ • boolean_formula_filename : The name of the file that holds the boolean formula to be converted
+ • NOTE : The given formula must be provided in the form described above under "Data Definitions"
 ```
 
 ### Make Check (make-check.rkt)
