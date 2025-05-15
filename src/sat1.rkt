@@ -40,7 +40,7 @@
               [(list p ...)
                (printf "SAT\n")
                (define sorted (sort (apply list p) (lambda ([x : Integer] [y : Integer]) (< (abs x) (abs y)))))
-               (printf "~a0\n" (tva->string sorted))
+               (printf "~a0\n\n" (tva->string sorted))
                (if (and (equal? v 1) (not (equal? vars '())))
                    (let ([formatted-result (format sorted vars)])
                      (for ([res (in-list formatted-result)])
