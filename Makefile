@@ -1,4 +1,4 @@
-all: bf-sat sat1 sat2 dpll-sat cdcl-sat make-check 
+all: bf-sat sat1 sat2 dpll-sat cdcl-sat write-cnf make-check 
 
 bf-sat: src/bf-sat.rkt
 	raco exe -o bf-sat src/bf-sat.rkt
@@ -15,8 +15,11 @@ dpll-sat: src/dpll-sat.rkt
 cdcl-sat: src/cdcl-sat.rkt
 	raco exe -o cdcl-sat src/cdcl-sat.rkt
 
+write-cnf: src/write-cnf.rkt
+	raco exe -o write-cnf src/write-cnf.rkt
+
 make-check: src/make-check.rkt
 	raco exe -o make-check src/make-check.rkt
 
 clean: 
-	rm -rf bf-sat sat1 sat2 dpll-sat cdcl-sat make-check
+	rm -rf bf-sat sat1 sat2 dpll-sat cdcl-sat write-cnf make-check
