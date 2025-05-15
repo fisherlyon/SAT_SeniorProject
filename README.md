@@ -79,26 +79,28 @@ This SAT solver implementation checks every possible truth value assignment (TVA
 ```
 Usage: ./bf-sat <in_filename> [<out_filename>]
 
- - in_filename : The file name of the input .cnf file to be tested for satisfiability
- - out_filename : Optional file name of a file where output from the satisfiability test will be written
+ • in_filename : The file name of the input .cnf file to be tested for satisfiability
+ • out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ### SAT-I SAT Solver (sat1.rkt)
 This SAT solver implementation utilizes Depth-First-Search (DFS) and returns a complete variable instantiation (truth value assignment). It also uses the idea of conditioning. When traversing the tree, at each level, a TVA is assigned to a variable. By conditioning the knowledge base (boolean formula) on the variable given its TVA, we can reduce the size of the knowledge base until either SAT or UNSAT is returned. As previously stated, this variation returns a complete variable instantiation, meaning we have conditioned the knowledge base on every variable.<br>
 ```
-Usage: ./sat1 <in_filename> [<out_filename>]
+Usage: ./sat1 [-v] <in_filename> [<out_filename>]
 
- - in_filename : The file name of the input .cnf file to be tested for satisfiability
- - out_filename : Optional file name of a file where output from the satisfiability test will be written
+ • -v : Verbose truth value assignment result
+ • in_filename : The file name of the input .cnf file to be tested for satisfiability
+ • out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ### SAT-II SAT Solver (sat2.rkt)
 This SAT solver implementation is just an extension of the previoiusly mentioned SAT-I. The only difference between SAT-II and SAT-I is that SAT-II returns a partial variable instantiation. This can be done due to the fact that it isn't always necessary to traverse the tree all the way down to a leaf node in order to have SAT returned.<br>
 ```
-Usage: ./sat2 <in_filename> [<out_filename>]
+Usage: ./sat2 [-v] <in_filename> [<out_filename>]
 
- - in_filename : The file name of the input .cnf file to be tested for satisfiability
- - out_filename : Optional file name of a file where output from the satisfiability test will be written
+ • -v : Verbose truth value assigment result
+ • in_filename : The file name of the input .cnf file to be tested for satisfiability
+ • out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ### DPLL SAT Solver (dpll-sat.rkt)
@@ -106,8 +108,8 @@ This SAT solver implementation utilizes the David-Putnam-Logemann-Loveland (DPLL
 ```
 Usage: ./dpll-sat <in_filename> [<out_filename>]
 
- - in_filename : The file name of the input .cnf file to be tested for satisfiability
- - out_filename : Optional file name of a file where output from the satisfiability test will be written
+ • in_filename : The file name of the input .cnf file to be tested for satisfiability
+ • out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ### CDCL SAT Solver (cdcl-sat.rkt)
@@ -115,8 +117,8 @@ This SAT solver implementation utilizes the idea of Conflict-Driven Clause Learn
 ```
 Usage: ./cdcl-sat <in_filename> [<out_filename>]
 
- - in_filename : The file name of the input .cnf file to be tested for satisfiability
- - out_filename : Optional file name of a file where output from the satisfiability test will be written
+ • in_filename : The file name of the input .cnf file to be tested for satisfiability
+ • out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ## CNF Tools
@@ -157,9 +159,9 @@ This program was made as a tool for myself so that I could test the SAT implemen
 ```
 Usage: ./make-check <SAT_OUT> <check_filename>
 
- - SAT_OUT : The file name of the output from a satisfiability test
- - check_filename : The file name of the .cnf file that was tested on
- - NOTE : It is recommended that 'check_filename' is a copy of the original .cnf file because text appending occurs to the file
+ • SAT_OUT : The file name of the output from a satisfiability test
+ • check_filename : The file name of the .cnf file that was tested on
+ • NOTE : It is recommended that 'check_filename' is a copy of the original .cnf file because text appending occurs to the file
 ```
 
 ## Resources
