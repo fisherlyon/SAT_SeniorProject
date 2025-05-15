@@ -26,10 +26,9 @@ The parsed result is the knowledge base in clausal form and the number of variab
 ;;                 (printf "~a0\n" (get-sat-result (build-list num-vars add1) (bin-to-bool (padded-binary result num-vars))))))))))
 
 ; will parse the input cnf file, returning the cnf list and the number of variables
-(define (parse-file [file : String]) : (Values (Listof (Listof Integer)) Integer (Listof String))
+(define (parse-file [file : String]) : (Values (Listof (Listof Integer)) Integer)
   (define in-port (open-input-file file))
   (define num-vars : Integer 0)
-  (define vars : (Listof String) '())
   (define cnf-list : (Listof (Listof Integer)) '())
   (for ([line (in-lines in-port)])
     (define line-list (string-split line))
@@ -39,8 +38,6 @@ The parsed result is the knowledge base in clausal form and the number of variab
        (if (int? vars)
            (set! num-vars (str->int vars))
            (error 'parse-file "Invalid 'p' line in CNF file, given ~a" line))]
-      [(list "c" "VARS:" v ...)
-       (set! vars v)]
       [(list "c" text ...) (void)] ; ignore comment lines
       [(list nums ...)
        (if (and (int-list? line-list) (> (length line-list) 1))
@@ -48,7 +45,7 @@ The parsed result is the knowledge base in clausal form and the number of variab
            (void))]
       [_ (void)]))
   (close-input-port in-port)
-  (values (reverse cnf-list) num-vars vars))
+  (values (reverse cnf-list) num-vars))
 
 ; checks if a string is an integer?
 (define (int? [s : String]) : Boolean

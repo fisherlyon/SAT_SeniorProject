@@ -1,25 +1,10 @@
-all: bf-sat sat1 sat2 dpll-sat cdcl-sat write-cnf make-check 
+RKT_SRCS := bf-sat sat1 sat2 dpll-sat cdcl-sat write-cnf make-check
 
-bf-sat: src/bf-sat.rkt
-	raco exe -o bf-sat src/bf-sat.rkt
+all: $(RKT_SRCS)
 
-sat1: src/sat1.rkt
-	raco exe -o sat1 src/sat1.rkt
+$(RKT_SRCS): %: src/%.rkt
+	raco exe -o $@ $<
 
-sat2: src/sat2.rkt
-	raco exe -o sat2 src/sat2.rkt
+clean:
+	rm -rf $(RKT_SRCS)
 
-dpll-sat: src/dpll-sat.rkt
-	raco exe -o dpll-sat src/dpll-sat.rkt
-
-cdcl-sat: src/cdcl-sat.rkt
-	raco exe -o cdcl-sat src/cdcl-sat.rkt
-
-write-cnf: src/write-cnf.rkt
-	raco exe -o write-cnf src/write-cnf.rkt
-
-make-check: src/make-check.rkt
-	raco exe -o make-check src/make-check.rkt
-
-clean: 
-	rm -rf bf-sat sat1 sat2 dpll-sat cdcl-sat write-cnf make-check

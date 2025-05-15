@@ -2,18 +2,6 @@
 
 (provide (all-defined-out))
 
-; formats verbose result
-; assumes result is sorted
-(define (format [result : (Listof Integer)] [vars : (Listof String)]) : (Listof String)
-  (match result
-    ['() '()]
-    [(cons f r)
-     (cons
-      (if (< f 0)
-          (string-append (list-ref vars (abs (+ f 1))) " = False")
-          (string-append (list-ref vars (- f 1)) " = True"))
-      (format r vars))]))
-
 ; condition a knowledge base on a literal
 ; "condition ∆ on P_n"
 ; kb = knowledge base (∆)

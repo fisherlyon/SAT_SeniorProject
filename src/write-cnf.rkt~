@@ -43,8 +43,7 @@ This file format is used commonly in modern SAT solvers.
          [num-form (reverse (subst-nums-for-vars rf-form vars num-subs))]) ; the number form cnf of the reformatted cnf
     (with-output-to-file filename
       (lambda ()
-        (printf "c FILE: ~a\n" filename)
-        (printf "c VARS: ~a\nc\n" (string-join (map ~a vars) " "))
+        (printf "c FILE: ~a\nc\n" filename)
         (printf "p cnf ~a ~a\n" (length vars) (length num-form))
         (for ([disjunct num-form])
           (printf "~a 0\n" (string-join (map ~a disjunct) " "))))
