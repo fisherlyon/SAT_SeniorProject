@@ -79,8 +79,8 @@ This SAT solver implementation checks every possible truth value assignment (TVA
 ```
 Usage: ./bf-sat <in_filename> [<out_filename>]
 
- - in_filename : the file name of the input .cnf file to be tested for satisfiability
- - out_filename : optional file name of a file where output from the satisfiability test will be written
+ - in_filename : The file name of the input .cnf file to be tested for satisfiability
+ - out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ### SAT-I SAT Solver (sat1.rkt)
@@ -88,8 +88,8 @@ This SAT solver implementation utilizes Depth-First-Search (DFS) and returns a c
 ```
 Usage: ./sat1 <in_filename> [<out_filename>]
 
- - in_filename : the file name of the input .cnf file to be tested for satisfiability
- - out_filename : optional file name of a file where output from the satisfiability test will be written
+ - in_filename : The file name of the input .cnf file to be tested for satisfiability
+ - out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ### SAT-II SAT Solver (sat2.rkt)
@@ -97,8 +97,8 @@ This SAT solver implementation is just an extension of the previoiusly mentioned
 ```
 Usage: ./sat2 <in_filename> [<out_filename>]
 
- - in_filename : the file name of the input .cnf file to be tested for satisfiability
- - out_filename : optional file name of a file where output from the satisfiability test will be written
+ - in_filename : The file name of the input .cnf file to be tested for satisfiability
+ - out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ### DPLL SAT Solver (dpll-sat.rkt)
@@ -106,8 +106,8 @@ This SAT solver implementation utilizes the David-Putnam-Logemann-Loveland (DPLL
 ```
 Usage: ./dpll-sat <in_filename> [<out_filename>]
 
- - in_filename : the file name of the input .cnf file to be tested for satisfiability
- - out_filename : optional file name of a file where output from the satisfiability test will be written
+ - in_filename : The file name of the input .cnf file to be tested for satisfiability
+ - out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ### CDCL SAT Solver (cdcl-sat.rkt)
@@ -115,8 +115,8 @@ This SAT solver implementation utilizes the idea of Conflict-Driven Clause Learn
 ```
 Usage: ./cdcl-sat <in_filename> [<out_filename>]
 
- - in_filename : the file name of the input .cnf file to be tested for satisfiability
- - out_filename : optional file name of a file where output from the satisfiability test will be written
+ - in_filename : The file name of the input .cnf file to be tested for satisfiability
+ - out_filename : Optional file name of a file where output from the satisfiability test will be written
 ```
 
 ## CNF Tools
@@ -157,9 +157,9 @@ This program was made as a tool for myself so that I could test the SAT implemen
 ```
 Usage: ./make-check <SAT_OUT> <check_filename>
 
- - SAT_OUT : the file name of the output from a satisfiability test
- - check_filename : the file name of the .cnf file that was tested on
- - NOTE : it is recommended that 'check_filename' is a copy of the original .cnf file because text appending occurs to the file
+ - SAT_OUT : The file name of the output from a satisfiability test
+ - check_filename : The file name of the .cnf file that was tested on
+ - NOTE : It is recommended that 'check_filename' is a copy of the original .cnf file because text appending occurs to the file
 ```
 
 ## Resources
