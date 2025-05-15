@@ -13,11 +13,27 @@ This file format is used commonly in modern SAT solvers.
 ; the main -- to be ran from the command line, takes in a filename and a formula, returns the cnf file
 (define (main) : Void
   (define args (vector->list (current-command-line-arguments)))
-  (if (not (equal? (length args) 2))
-      (printf "Usage: racket write_cnf.rkt <filename> \"<formula>\"\n")
-      (write-cnf-file
-       (first args)
-       (cast (read (open-input-string (second args))) Sexp))))
+  (if (not (equal? (length args) 3))
+      (begin
+        (printf "Usage: ./write-cnf -c <filename> \"<boolean_formula>\"\n")
+        (printf "Usage: ./write-cnf -f <filename> <boolean_formula_filename>\n"))
+      (match (first args)
+        ["-c" (write-cnf-file
+               (second args)
+               (cast (read (open-input-string (third args))) Sexp))]
+        ["-f"
+         (define formula
+           (with-handlers
+               ([exn:fail?
+                 (lambda ([e : exn])
+                   (printf "Error reading the formula from file: ~a\n" (third args))
+                   (exit 1))])
+             (with-input-from-file (third args)
+               (lambda () (read)))))
+         (write-cnf-file (second args) (cast formula Sexp))]
+        [_ (begin
+             (printf "Usage: ./write-cnf -c <filename> \"<boolean_formula>\"\n")
+             (printf "Usage: ./write-cnf -f <filename> <boolean_formula_filename>\n"))])))
 
 ; given a formula, convert it to CNF and write it to a file in .cnf format
 (define (write-cnf-file [filename : String] [form : Sexp]) : Void
