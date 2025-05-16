@@ -11,7 +11,7 @@ To make all SAT solvers and tools:
 ```make
 make all
 ```
-To make specified solvers/tools:
+To make specific solvers/tools:
 ```make
 make bf-sat
 make sat1
