@@ -18,6 +18,8 @@ make sat1
 make sat2
 make dpll-sat
 make cdcl-sat
+make write-cnf
+make make-check
 ```
 The usage of each of the solvers/tools is shown below under their descriptions.
 
