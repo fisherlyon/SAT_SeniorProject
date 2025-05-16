@@ -132,11 +132,11 @@ Usage: ./cdcl-sat [-v] <in_filename> [<out_filename>]
 
 ### CNF File Creation (write-cnf.rkt)
 The core purpose of this program is to take an arbitrary boolean formula, convert it to CNF, and put that transformation into a file with the DIMACS .cnf format. This file format is used commonly in modern SAT solvers.<br>
-For DIMACS .cnf form:
-• Lines that begin with 'c' are comment lines.
-    - .cnf files created using this program will contain a comment line of the variables used--this is used for verbose results
-•The line that begins with 'p' is the header/problem line. The 'p' is followed by the problem type, which in our case is 'cnf'. After the problem type, the number of variables is stated, followed by the number of clauses.
-• The remaining lines are the clauses of the formula, where each line is a disjunct terminated by a '0'. Positive boolean variables are represented by positive integers and the negation of a boolean variable is represnted by a negative integer. 
+For DIMACS .cnf form:<bf>
+- Lines that begin with 'c' are comment lines.<bf>
+    - .cnf files created using this program will contain a comment line of the variables used--this is used for verbose results<br>
+- The line that begins with 'p' is the header/problem line. The 'p' is followed by the problem type, which in our case is 'cnf'. After the problem type, the number of variables is stated, followed by the number of clauses.<br>
+- The remaining lines are the clauses of the formula, where each line is a disjunct terminated by a '0'. Positive boolean variables are represented by positive integers and the negation of a boolean variable is represnted by a negative integer. 
 ```
 ex. (& (v A B) (v C (~ D)))
  => (& (v 1 2) (v 3 -4))
