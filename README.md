@@ -128,7 +128,18 @@ Usage: ./cdcl-sat [-v] <in_filename> [<out_filename>]
 ## CNF Tools
 
 ### Tseitin Transformation (tseitin.rkt)
-...
+This program--based on the [Tseitin Transformation Algorithm](https://en.wikipedia.org/wiki/Tseytin_transformation)--converts a boolean formula into an equisatisfiable boolean formula in conjunctive normal form (CNF), with formula size growing linearly. Another method of CNF conversion--the naive approach--is to use De Morgan's law and the distributive property to convert the given boolean formula to CNF. However, this can result in an exponential increase formula size.
+```
+Usage: ./tseitin -c \"<boolean_formula>\" [<out_filename>]
+Usage: ./tseitin -f <boolean_formula_filename> [<out_filename>]
+
+ • -c : Run ./tseitin with command-line argument boolean formula
+ • -f : Run ./tseitin with in-file boolean formula
+ • boolean_formula : The boolean formula to be converted (must be in quotes)
+ • boolean_formula_filename : The name of the file that holds the boolean formula to be converted
+ • out_filename : Optional file name of a file where output from the satisfiability test will be written
+ • NOTE : The given formula must be provided in the form described above under "Data Definitions"
+```
 
 ### CNF File Creation (write-cnf.rkt)
 The core purpose of this program is to take an arbitrary boolean formula, convert it to CNF, and put that transformation into a file with the DIMACS .cnf format. This file format is used commonly in modern SAT solvers.<br>
@@ -152,8 +163,8 @@ ex. (& (v A B) (v C (~ D)))
 Usage: ./write-cnf -c <filename> "<boolean_formula>"
 Usage: ./write-cnf -f <filename> <boolean_formula_filename>
 
- • -c : Run write-cnf with command-line boolean formula
- • -f : Run write-cnf with in-file boolean formula
+ • -c : Run ./write-cnf with command-line argument boolean formula
+ • -f : Run ./write-cnf with in-file boolean formula
  • filename : The file name of the .cnf file to be written to
  • boolean_formula : The boolean formula to be converted (must be in quotes)
  • boolean_formula_filename : The name of the file that holds the boolean formula to be converted
