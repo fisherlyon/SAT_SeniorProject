@@ -1,4 +1,4 @@
-RKT_SRCS := bf-sat sat1 sat2 dpll-sat cdcl-sat write-cnf make-check
+RKT_SRCS := bf-sat sat1 sat2 dpll-sat cdcl-sat tseitin write-cnf make-check
 
 all: $(RKT_SRCS)
 

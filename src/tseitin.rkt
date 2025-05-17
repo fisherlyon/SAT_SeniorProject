@@ -9,6 +9,35 @@
 ; Tseitin Transformation
 ; ----------------------
 
+; the main -- to be ran from the command line
+; takes in a formula either via command line argument or through a file
+; returns formula either via command line
+(define (main) : Void
+  (define args (vector->list (current-command-line-arguments)))
+  (define n (length args))
+  (define (usage) : Void
+    (printf "Usage: ./tseitin -c \"<boolean_formula>\" [<out_filename>]\n")
+    (printf "Usage: ./tseitin -f <boolean_formula_filename> [<out_filename>]\n"))
+  (define (output-fun) : Void
+    (match (first args)
+      ["-c" (printf "~a\n" (tseitin-sexp (cast (read (open-input-string (second args))) Sexp)))]
+      ["-f"
+       (define formula
+         (with-handlers
+             ([exn:fail?
+               (lambda ([e : exn])
+                 (printf "Error reading the formula from file: ~a\n" (second args))
+                 (exit 1))])
+           (with-input-from-file (second args)
+             (lambda () (read)))))
+       (printf "~a\n" (tseitin-sexp (cast formula Sexp)))]
+      [_ (usage)]))
+  (if (or (< n 1) (> n 3))
+      (usage)
+      (if (equal? n 3)
+          (with-output-to-file (third args) output-fun #:exists 'replace)
+          (output-fun))))
+
 ; tseitin transformation (sexp -> sexp)
 (define (tseitin-sexp [form : Sexp]) : Sexp
   (define p-form (parse form))
@@ -152,3 +181,5 @@
 ; makes an auxilary variable symbol
 (define (make-var [n : Integer]) : Symbol
   (string->symbol (format "x~a" n)))
+
+(main)
