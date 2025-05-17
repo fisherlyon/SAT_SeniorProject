@@ -18,6 +18,7 @@ make sat1
 make sat2
 make dpll-sat
 make cdcl-sat
+make tseitin
 make write-cnf
 make make-check
 ```
