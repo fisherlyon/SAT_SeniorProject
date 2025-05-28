@@ -53,9 +53,8 @@
 (define (cdcl-sat [kb : (Listof (Listof Integer))]) : (U Boolean (Listof Integer))
   (define D : (Boxof (Listof Integer)) (box '()))
   (define G : (Listof (Listof Integer)) '{})
-  (define I : (Listof Integer) '())
   (define (while-true) : (U Boolean (Listof Integer))
-    (let-values ([(I new-kb) (cdcl-unit-res kb G (unbox D) I)])
+    (let-values ([(I new-kb) (cdcl-unit-res kb G (unbox D) '())])
       (if (equal? new-kb '{{}}) ; if unit resolution detects a contradiction
           (if (empty? (unbox D)) ; contradiction without any decisions
               #f ; so return false -- UNSAT
