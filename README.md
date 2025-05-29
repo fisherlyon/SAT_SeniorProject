@@ -78,7 +78,7 @@ Where...
 ## SAT Solver Implementations
 
 ### Brute Force SAT Solver (bf-sat.rkt)
-This SAT solver implementation checks every possible *truth value assignment* (TVA) starting by setting all variables in a boolean formula to false, then working up to setting all variables being true. For a formula with *n* boolean variables, there are 2<sup>n</sup> possible TVAs. So, in order to test all possible TVAs, the program uses the binary representation of integers from 0 to 2<sup>*n*</sup>-1, assigning each bit in the integer to a variable in the boolean formula. After an UNSAT, the current TVA integer is incremented to TVA+1, then that is tested. Once one of the TVAs returns SAT, that TVA is returned and each of the bits in the integer is mapped back to either True or False.<br>
+This SAT solver implementation checks every possible *truth value assignment* (TVA) starting by setting all variables in a boolean formula to false, then working up to setting all variables being true. For a formula with *n* boolean variables, there are 2<sup>*n*</sup> possible TVAs. So, in order to test all possible TVAs, the program uses the binary representation of integers from 0 to 2<sup>*n*</sup>-1, assigning each bit in the integer to a variable in the boolean formula. After an UNSAT, the current TVA integer is incremented to TVA+1, then that is tested. Once one of the TVAs returns SAT, that TVA is returned and each of the bits in the integer is mapped back to either True or False.<br>
 ```
 Usage: ./bf-sat <in_filename> [<out_filename>]
 
@@ -87,7 +87,7 @@ Usage: ./bf-sat <in_filename> [<out_filename>]
 ```
 
 ### SAT-I SAT Solver (sat1.rkt)
-The SAT-I solver implementation utilizes *Depth-First-Search* (DFS) and returns a complete variable instantiation (truth value assignment). It also uses the idea of *conditioning*. When traversing the tree, at each level, a TVA is assigned to a variable. By conditioning the knowledge base on the variable given its TVA, we can reduce the size of the knowledge base until either SAT or UNSAT is returned. As stated previously, this variation returns a complete variable instantiation, which means that we have conditioned the knowledge base on every variable.<br>
+The SAT-I solver implementation utilizes *Depth-First-Search* (DFS) and returns a *complete variable instantiation* (truth value assignment). It also uses the idea of *conditioning*. When traversing the tree, at each level, a TVA is assigned to a variable. By conditioning the knowledge base on the variable given its TVA, we can reduce the size of the knowledge base until either SAT or UNSAT is returned. As stated previously, this variation returns a complete variable instantiation, which means that we have conditioned the knowledge base on every variable.<br>
 ```
 Usage: ./sat1 [-v] <in_filename> [<out_filename>]
 
