@@ -1,8 +1,8 @@
 # Welcome to My SAT Solver Senior Project
 To learn more about the goal of this project, please view the Proposal and Sprint documents.<br>
 
-## Statistics
-Statistics obtained using HyperFine -- A Command-line Benchmarking Tool
+<!--## Statistics
+Statistics obtained using HyperFine -- A Command-line Benchmarking Tool-->
 
 ## Running
 In the provided code, there is a Makefile that allows the creation of executables from the command-line for the various SAT solvers and tools shown below.
