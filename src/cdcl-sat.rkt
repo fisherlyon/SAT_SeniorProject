@@ -193,9 +193,12 @@
 
 ; Gets the assertion level of an asserting clause
 (define (get-assertion-level [levels : (Listof Integer)]) : Integer
-  (if (equal? (length levels) 1)
-      -1 ; case where the asserting clause is a unit clause
-      (apply min levels))) ; return minimum decision level
+  (cond
+    [(<= (length levels) 1) -1] ; clause is unit or empty, no assertion level
+    [else
+     (let* ([sorted-levels (sort levels >)] ; sort descending
+            [second-highest (second sorted-levels)])
+       second-highest)]))
 
 ; Builds an implication graph
 ; An implication graph is a data structure that shows us how we arrived at a contradiction from unit resolution
